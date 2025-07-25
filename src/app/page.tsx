@@ -1,103 +1,305 @@
-import Image from "next/image";
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { FormData, AuditResult } from '@/types';
+import ProgressBar from '@/components/ProgressBar';
+import Landing from '@/components/Landing';
+import LeadForm from '@/components/LeadForm';
+import WebsiteForm from '@/components/WebsiteForm';
+import Analysis from '@/components/Analysis';
+import Report from '@/components/Report';
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  // State for multi-step form
+  const [step, setStep] = useState(0); // 0: Landing, 1: Lead Form, 2: Website Form, 3: Analysis, 4: Report
+  const [formData, setFormData] = useState<FormData>({
+    name: '',
+    email: '',
+    website: '',
+  });
+  const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [error, setError] = useState('');
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  // Handle start button click
+  const handleStart = () => {
+    setStep(1);
+  };
+
+  // Handle lead form submission
+  const handleLeadSubmit = async (data: { name: string; email: string }) => {
+    setLoading(true);
+    setError('');
+
+    try {
+      // Save contact to ActiveCampaign
+      const response = await fetch('/api/active-campaign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to save contact information');
+      }
+
+      // Update form data and proceed to next step
+      setFormData(prev => ({ ...prev, ...data }));
+      setStep(2);
+    } catch (error: any) {
+      setError(error.message || 'An unexpected error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle website form submission
+  const handleWebsiteSubmit = async (data: {
+    website: string;
+    businessGoal?: string;
+    industry?: string;
+    runningAds?: string;
+  }) => {
+    setLoading(true);
+    setError('');
+    setStep(3); // Move to analysis step immediately to show progress
+
+    // Start progress simulation
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+      progress += 1;
+      setAnalysisProgress(prev => {
+        const newProgress = prev + 1;
+        return newProgress > 95 ? 95 : newProgress; // Cap at 95% until real completion
+      });
+      
+      if (progress >= 95) {
+        clearInterval(progressInterval);
+      }
+    }, 500);
+
+    try {
+      // Update form data
+      const updatedFormData = { ...formData, ...data };
+      setFormData(updatedFormData);
+
+      // Call API to analyze website
+      const response = await fetch('/api/openai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to analyze website');
+      }
+
+      // Clear progress interval and set to 100%
+      clearInterval(progressInterval);
+      setAnalysisProgress(100);
+
+      // Set audit result and move to report step after a short delay
+      setTimeout(() => {
+        setAuditResult(result.data);
+        setStep(4);
+      }, 1000);
+    } catch (error: any) {
+      clearInterval(progressInterval);
+      setError(error.message || 'An unexpected error occurred');
+      // Stay on analysis step but show error
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle back button on website form
+  const handleWebsiteBack = () => {
+    setStep(1);
+  };
+
+  // Handle PDF download
+  const handleDownloadPdf = async () => {
+    if (!auditResult) return;
+    
+    setPdfLoading(true);
+    try {
+      const response = await fetch('/api/pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          auditResult,
+          userData: formData,
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to generate PDF');
+      }
+
+      // Create a link and trigger download
+      const link = document.createElement('a');
+      link.href = result.data.pdf;
+      link.download = `${formData.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}-brand-audit.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error: any) {
+      setError(error.message || 'Failed to download PDF');
+    } finally {
+      setPdfLoading(false);
+    }
+  };
+
+  // Handle email sending
+  const handleSendEmail = async () => {
+    if (!auditResult) return;
+    
+    setEmailLoading(true);
+    try {
+      // First generate the PDF
+      const pdfResponse = await fetch('/api/pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          auditResult,
+          userData: formData,
+        }),
+      });
+
+      const pdfResult = await pdfResponse.json();
+      
+      if (!pdfResult.success) {
+        throw new Error(pdfResult.message || 'Failed to generate PDF');
+      }
+
+      // Then send the email with the PDF
+      const emailResponse = await fetch('/api/pdf/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          name: formData.name,
+          website: formData.website,
+          pdfBase64: pdfResult.data.pdf,
+        }),
+      });
+
+      const emailResult = await emailResponse.json();
+      
+      if (!emailResult.success) {
+        throw new Error(emailResult.message || 'Failed to send email');
+      }
+
+      // Show success notification or message
+      alert('PDF report sent to your email successfully!');
+    } catch (error: any) {
+      setError(error.message || 'Failed to send email');
+    } finally {
+      setEmailLoading(false);
+    }
+  };
+
+  // Render current step
+  const renderStep = () => {
+    switch (step) {
+      case 0:
+        return <Landing onStart={handleStart} />;
+      case 1:
+        return (
+          <div className="py-8 md:py-12 w-full">
+            <ProgressBar currentStep={1} totalSteps={4} />
+            <LeadForm 
+              onSubmit={handleLeadSubmit} 
+              isLoading={loading} 
+              defaultValues={formData}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+          </div>
+        );
+      case 2:
+        return (
+          <div className="py-8 md:py-12 w-full">
+            <ProgressBar currentStep={2} totalSteps={4} />
+            <WebsiteForm 
+              onSubmit={handleWebsiteSubmit} 
+              onBack={handleWebsiteBack}
+              isLoading={loading}
+              defaultValues={formData}
+            />
+          </div>
+        );
+      case 3:
+        return (
+          <div className="py-8 md:py-12 w-full">
+            <ProgressBar currentStep={3} totalSteps={4} />
+            <Analysis progress={analysisProgress} />
+          </div>
+        );
+      case 4:
+        return (
+          <div className="py-8 md:py-12 w-full">
+            <ProgressBar currentStep={4} totalSteps={4} />
+            {auditResult && (
+              <Report 
+                auditResult={auditResult}
+                userName={formData.name}
+                userEmail={formData.email}
+                website={formData.website}
+                onDownloadPdf={handleDownloadPdf}
+                onSendEmail={handleSendEmail}
+                isGeneratingPdf={pdfLoading}
+                isSendingEmail={emailLoading}
+              />
+            )}
+          </div>
+        );
+      default:
+        return <Landing onStart={handleStart} />;
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col w-full">
+      {step > 0 && (
+        <header className="bg-navy text-white py-6 shadow-md w-full">
+          <div className="container mx-auto px-4 flex items-center justify-center">
+            <h1 className="font-heading text-2xl md:text-3xl font-bold tracking-heading text-balance">Website Brand Audit Tool</h1>
+          </div>
+        </header>
+      )}
+
+      <main className="flex-grow w-full">
+        {error && (
+          <div className="w-full max-w-lg mx-auto bg-white border-l-4 border-purple text-purple p-4 my-6 rounded-md shadow-md">
+            <div className="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <p>{error}</p>
+            </div>
+          </div>
+        )}
+        
+        {renderStep()}
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      
+      {step > 0 && (
+        <footer className="bg-tan py-6 mt-auto border-t border-gold border-opacity-20 w-full">
+          <div className="container mx-auto px-4">
+            <div className="text-center text-sm text-navy text-balance">
+              &copy; {new Date().getFullYear()} Website Brand Audit Tool
+            </div>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }
