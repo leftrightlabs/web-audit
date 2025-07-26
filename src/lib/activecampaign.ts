@@ -97,6 +97,27 @@ export const addContact = async (
               website: websiteUrl, // Using standard website field
             }
           });
+          
+          // Also add website as a custom field if the field ID is set
+          const websiteFieldId = process.env.AC_FIELD_WEBSITE;
+          if (websiteFieldId) {
+            try {
+              console.log(`Adding website URL to custom field ID ${websiteFieldId}`);
+              await acClient.post('/api/3/fieldValues', {
+                fieldValue: {
+                  contact: contactId,
+                  field: websiteFieldId,
+                  value: websiteUrl,
+                },
+              });
+              console.log('Successfully added website URL to custom field');
+            } catch (fieldError: unknown) {
+              console.error('Error adding website URL to custom field:', fieldError);
+              if (isAxiosLikeError(fieldError)) {
+                console.error('Field error details:', fieldError.response.data);
+              }
+            }
+          }
         }
       }
     } catch (findError: unknown) {
@@ -132,6 +153,29 @@ export const addContact = async (
 
         contactId = response.data.contact.id;
         console.log(`Created new contact with ID: ${contactId} and website: ${websiteUrl}`);
+        
+        // Also add website as a custom field if the field ID is set
+        if (websiteUrl) {
+          const websiteFieldId = process.env.AC_FIELD_WEBSITE;
+          if (websiteFieldId) {
+            try {
+              console.log(`Adding website URL to custom field ID ${websiteFieldId}`);
+              await acClient.post('/api/3/fieldValues', {
+                fieldValue: {
+                  contact: contactId,
+                  field: websiteFieldId,
+                  value: websiteUrl,
+                },
+              });
+              console.log('Successfully added website URL to custom field');
+            } catch (fieldError: unknown) {
+              console.error('Error adding website URL to custom field:', fieldError);
+              if (isAxiosLikeError(fieldError)) {
+                console.error('Field error details:', fieldError.response.data);
+              }
+            }
+          }
+        }
       } catch (createError: unknown) {
         console.error('Error creating contact:', createError);
         if (isAxiosLikeError(createError)) {
