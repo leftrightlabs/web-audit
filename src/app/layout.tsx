@@ -21,10 +21,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={workSans.variable}>
-      <body className="min-h-screen">
-        <main className="flex min-h-screen flex-col items-center justify-between">
-          {children}
-        </main>
+      <body>
+        {children}
       </body>
     </html>
   );

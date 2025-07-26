@@ -69,7 +69,7 @@ const LeadForm: React.FC<LeadFormProps> = ({ onSubmit, isLoading, defaultValues 
               fullWidth 
               isLoading={isLoading}
             >
-              Continue to Website Details
+              Continue
             </Button>
           </div>
           

@@ -5,13 +5,13 @@ import { FormData, AuditResult } from '@/types';
 import ProgressBar from '@/components/ProgressBar';
 import Landing from '@/components/Landing';
 import LeadForm from '@/components/LeadForm';
-import WebsiteForm from '@/components/WebsiteForm';
+import PreferencesForm from '@/components/PreferencesForm';
 import Analysis from '@/components/Analysis';
 import Report from '@/components/Report';
 
 export default function Home() {
   // State for multi-step form
-  const [step, setStep] = useState(0); // 0: Landing, 1: Lead Form, 2: Website Form, 3: Analysis, 4: Report
+  const [step, setStep] = useState(0); // 0: Landing, 1: Lead Form, 2: Preferences Form (with Website URL), 3: Analysis, 4: Report
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -48,7 +48,7 @@ export default function Home() {
         throw new Error(result.message || 'Failed to save contact information');
       }
 
-      // Update form data and proceed to next step
+      // Update form data and proceed to next step (preferences)
       setFormData(prev => ({ ...prev, ...data }));
       setStep(2);
     } catch (error: any) {
@@ -58,12 +58,15 @@ export default function Home() {
     }
   };
 
-  // Handle website form submission
-  const handleWebsiteSubmit = async (data: {
+  // Handle preferences form submission
+  const handlePreferencesSubmit = async (data: {
     website: string;
-    businessGoal?: string;
-    industry?: string;
-    runningAds?: string;
+    websiteGoal?: string;
+    industryType?: string;
+    targetAudience?: string;
+    brandPersonality?: string;
+    marketingCampaigns?: string;
+    improvementArea?: string;
   }) => {
     setLoading(true);
     setError('');
@@ -88,17 +91,34 @@ export default function Home() {
       const updatedFormData = { ...formData, ...data };
       setFormData(updatedFormData);
 
-      // Call API to analyze website
+      // Call API to analyze website with all form data
       const response = await fetch('/api/openai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(updatedFormData),
       });
 
       const result = await response.json();
 
       if (!result.success) {
         throw new Error(result.message || 'Failed to analyze website');
+      }
+
+      // Save lead data to Supabase
+      try {
+        const supabaseResponse = await fetch('/api/submit-lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedFormData),
+        });
+        
+        if (!supabaseResponse.ok) {
+          console.error('Failed to save lead data to Supabase');
+          // We'll continue even if Supabase save fails, as the OpenAI call succeeded
+        }
+      } catch (supabaseError) {
+        console.error('Error saving to Supabase:', supabaseError);
+        // Continue with the flow even if Supabase save fails
       }
 
       // Clear progress interval and set to 100%
@@ -119,8 +139,8 @@ export default function Home() {
     }
   };
 
-  // Handle back button on website form
-  const handleWebsiteBack = () => {
+  // Handle preferences form back button
+  const handlePreferencesBack = () => {
     setStep(1);
   };
 
@@ -135,7 +155,7 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           auditResult,
-          userData: formData,
+          userData: formData, // Include all form data including preferences
         }),
       });
 
@@ -171,7 +191,7 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           auditResult,
-          userData: formData,
+          userData: formData, // Include all form data including preferences
         }),
       });
 
@@ -228,9 +248,9 @@ export default function Home() {
         return (
           <div className="py-8 md:py-12 w-full">
             <ProgressBar currentStep={2} totalSteps={4} />
-            <WebsiteForm 
-              onSubmit={handleWebsiteSubmit} 
-              onBack={handleWebsiteBack}
+            <PreferencesForm 
+              onSubmit={handlePreferencesSubmit}
+              onBack={handlePreferencesBack}
               isLoading={loading}
               defaultValues={formData}
             />

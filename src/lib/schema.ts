@@ -5,15 +5,55 @@ export const leadFormSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' })
 });
 
-export const websiteFormSchema = z.object({
+// Updated preferences form schema with website URL
+export const preferencesFormSchema = z.object({
   website: z.string().url({ message: 'Please enter a valid website URL' }),
-  businessGoal: z.enum(['Leads', 'Sales', 'Awareness']).optional(),
-  industry: z.string().optional(),
-  runningAds: z.enum(['Yes', 'No']).optional()
+  websiteGoal: z.enum([
+    'Generate leads', 
+    'Sell products', 
+    'Build brand awareness', 
+    'Book appointments', 
+    'Other'
+  ]).optional(),
+  industryType: z.enum([
+    'Coaching / Consulting',
+    'eCommerce / Retail',
+    'SaaS / Tech',
+    'Health & Wellness',
+    'Creative / Portfolio',
+    'Other'
+  ]).optional(),
+  targetAudience: z.enum([
+    'Consumers (B2C)',
+    'Businesses (B2B)',
+    'Nonprofits / Education',
+    'I\'m not sure'
+  ]).optional(),
+  brandPersonality: z.enum([
+    'Professional & Polished',
+    'Bold & Energetic',
+    'Minimal & Modern',
+    'Friendly & Approachable',
+    'Luxurious & High-End'
+  ]).optional(),
+  marketingCampaigns: z.enum([
+    'Yes – Social Media Ads',
+    'Yes – Google Ads',
+    'No – Not yet',
+    'Not sure'
+  ]).optional(),
+  improvementArea: z.enum([
+    'Design / Visual Appeal',
+    'Messaging / Copywriting',
+    'SEO / Visibility',
+    'Conversion / Lead Capture',
+    'Overall Strategy'
+  ]).optional()
 });
 
-export const formSchema = leadFormSchema.merge(websiteFormSchema);
+// Remove the websiteFormSchema and use the combined form schema
+export const formSchema = leadFormSchema.merge(preferencesFormSchema);
 
 export type LeadFormValues = z.infer<typeof leadFormSchema>;
-export type WebsiteFormValues = z.infer<typeof websiteFormSchema>;
+export type PreferencesFormValues = z.infer<typeof preferencesFormSchema>;
 export type FormValues = z.infer<typeof formSchema>; 
