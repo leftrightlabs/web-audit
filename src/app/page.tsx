@@ -130,22 +130,15 @@ export default function Home() {
         throw new Error(result.message || 'Failed to analyze website');
       }
 
-      // Save lead data to Supabase
-      try {
-        const supabaseResponse = await fetch('/api/submit-lead', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updatedFormData),
-        });
-        
-        if (!supabaseResponse.ok) {
-          console.error('Failed to save lead data to Supabase');
-          // We'll continue even if Supabase save fails, as the OpenAI call succeeded
-        }
-      } catch (supabaseError) {
-        console.error('Error saving to Supabase:', supabaseError);
-        // Continue with the flow even if Supabase save fails
-      }
+      // Save lead data to Supabase (non-critical operation)
+      fetch('/api/submit-lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedFormData),
+      }).catch(err => {
+        // Log error but don't interrupt the user flow
+        console.error('Error saving to Supabase (non-critical):', err);
+      });
 
       // Clear progress interval and set to 100%
       clearInterval(progressInterval);
