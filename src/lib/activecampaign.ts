@@ -100,8 +100,8 @@ export const addContact = async (
           
           // Try to update custom fields with hardcoded IDs if available
           try {
-            // Common field IDs to try (1 is often the Website field in many AC accounts)
-            const possibleWebsiteFieldIds = [process.env.AC_FIELD_WEBSITE, "1", "28"];
+            // Field ID 7 is the confirmed Website field ID for this account, try others as fallbacks
+            const possibleWebsiteFieldIds = [process.env.AC_FIELD_WEBSITE, "7", "1", "28"];
             
             for (const fieldId of possibleWebsiteFieldIds) {
               if (!fieldId) continue;
@@ -168,8 +168,8 @@ export const addContact = async (
         // Also try with hardcoded IDs for new contacts
         if (websiteUrl) {
           try {
-            // Common field IDs to try (1 is often the Website field in many AC accounts)
-            const possibleWebsiteFieldIds = [process.env.AC_FIELD_WEBSITE, "1", "28"];
+            // Field ID 7 is the confirmed Website field ID for this account, try others as fallbacks
+            const possibleWebsiteFieldIds = [process.env.AC_FIELD_WEBSITE, "7", "1", "28"];
             
             for (const fieldId of possibleWebsiteFieldIds) {
               if (!fieldId) continue;
