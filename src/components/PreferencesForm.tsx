@@ -138,10 +138,16 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
   const onFormSubmit = (data: PreferencesFormValues) => {
     // Always allow form submission if the website URL is valid
     // (which is ensured by validation)
-    console.log("Submitting form data:", data);
+    console.log("Form submission triggered with data:", data);
     
-    // Call the onSubmit prop with the data
-    onSubmit(data);
+    try {
+      // Call the onSubmit prop with the data
+      console.log("Calling parent onSubmit handler");
+      onSubmit(data);
+      console.log("Parent onSubmit handler called successfully");
+    } catch (error) {
+      console.error("Error in form submission:", error);
+    }
   };
 
   // Check if we can proceed to questions
@@ -224,6 +230,11 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
               size="lg" 
               fullWidth 
               isLoading={isLoading}
+              onClick={() => {
+                // Manually trigger form submission
+                console.log("Manually triggering form submission");
+                handleSubmit(onFormSubmit)();
+              }}
               // This button should ALWAYS be enabled on the review screen
               // The website field is already validated before getting here
             >
@@ -315,7 +326,11 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-8 md:p-10 border border-gray-100">
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
+        <form 
+          onSubmit={handleSubmit(onFormSubmit)} 
+          className="space-y-6"
+          id="preferences-form"
+        >
           {renderCurrentQuestion()}
           
           <p className="text-center text-xs text-gray-500 mt-6 text-balance">
