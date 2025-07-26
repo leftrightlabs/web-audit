@@ -3,7 +3,7 @@
 const nextConfig = {
   // Set environment variables
   env: {
-    NEXT_PUBLIC_USE_MOCK_DATA: 'true',
+    // Environment variables now loaded from .env files
   },
   
   // Enable strict mode for React

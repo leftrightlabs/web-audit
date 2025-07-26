@@ -159,8 +159,8 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
     if (currentQuestionIndex === -1) return canProceedToQuestions;
     if (currentQuestionIndex >= questions.length) return true;
     
-    const questionId = questions[currentQuestionIndex].id;
-    return !!getValues(questionId);
+    // All questions are optional, so always return true to allow skipping
+    return true;
   };
 
   // Render the current question
@@ -223,8 +223,10 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
               size="lg" 
               fullWidth 
               isLoading={isLoading}
+              // Remove any disabled condition - the submit button should always be enabled on the review screen
+              // since all necessary fields (just the website URL) are already validated
             >
-              Analyze Website
+              Review & Submit
             </Button>
           </div>
         </div>
@@ -289,7 +291,7 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
               undefined}
             disabled={!isCurrentQuestionAnswered()}
           >
-            {currentQuestionIndex === questions.length - 1 ? "Review & Submit" : "Skip/Next"}
+            {currentQuestionIndex === questions.length - 1 ? "Review & Submit" : "Skip / Continue"}
           </Button>
         </div>
       </div>

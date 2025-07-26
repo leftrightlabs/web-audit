@@ -91,6 +91,32 @@ export default function Home() {
       const updatedFormData = { ...formData, ...data };
       setFormData(updatedFormData);
 
+      // Now that we have the website URL, send the complete contact data to ActiveCampaign
+      // This ensures the website field is included and the contact is added to list ID 36
+      try {
+        const acResponse = await fetch('/api/active-campaign', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: updatedFormData.name,
+            email: updatedFormData.email,
+            website: updatedFormData.website,
+            websiteGoal: updatedFormData.websiteGoal,
+            industryType: updatedFormData.industryType,
+            marketingCampaigns: updatedFormData.marketingCampaigns,
+          }),
+        });
+
+        if (!acResponse.ok) {
+          console.error('Failed to add contact to ActiveCampaign List ID 36');
+        } else {
+          console.log('Successfully added contact to ActiveCampaign List ID 36');
+        }
+      } catch (acError) {
+        console.error('Error adding contact to ActiveCampaign:', acError);
+        // Continue with the flow even if ActiveCampaign fails
+      }
+
       // Call API to analyze website with all form data
       const response = await fetch('/api/openai', {
         method: 'POST',
