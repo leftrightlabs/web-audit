@@ -100,34 +100,103 @@ export const addContact = async (
           
           // Try to update custom fields with hardcoded IDs if available
           try {
-            // Field ID 7 is the confirmed Website field ID for this account, try others as fallbacks
-            const possibleWebsiteFieldIds = [process.env.AC_FIELD_WEBSITE, "7", "1", "28"];
+            // Field ID 7 is the confirmed Website field ID for this account, try as both string and number
+            // Also try different field formats and API endpoints
+            console.log(`Attempting to add website URL "${websiteUrl}" to contact ${contactId} using multiple methods`);
             
-            for (const fieldId of possibleWebsiteFieldIds) {
-              if (!fieldId) continue;
+            // METHOD 1: Try using fieldValues endpoint with numeric ID
+            try {
+              console.log('METHOD 1: Using fieldValues endpoint with numeric ID');
+              await acClient.post('/api/3/fieldValues', {
+                fieldValue: {
+                  contact: contactId,
+                  field: 7, // Use numeric value instead of string
+                  value: websiteUrl,
+                },
+              });
+              console.log('SUCCESS with METHOD 1');
+            } catch (error1) {
+              console.error('METHOD 1 failed:', error1);
+              if (isAxiosLikeError(error1)) {
+                console.error('Error details:', error1.response?.status, error1.response?.data);
+              }
               
+              // METHOD 2: Try using direct contact update with custom fields
               try {
-                console.log(`Trying to add website URL to custom field ID ${fieldId}`);
-                await acClient.post('/api/3/fieldValues', {
-                  fieldValue: {
-                    contact: contactId,
-                    field: fieldId,
-                    value: websiteUrl,
-                  },
+                console.log('METHOD 2: Using direct contact update with field_7');
+                await acClient.put(`/api/3/contacts/${contactId}`, {
+                  contact: {
+                    email,
+                    firstName,
+                    lastName,
+                    website: websiteUrl,
+                    // Try setting field directly in contact object
+                    field_7: websiteUrl
+                  }
                 });
-                console.log(`Successfully added website URL to custom field ID ${fieldId}`);
-                break; // Stop trying if successful
-              } catch (fieldError: unknown) {
-                console.error(`Error adding website URL to custom field ID ${fieldId}:`, fieldError);
-                if (isAxiosLikeError(fieldError)) {
-                  console.error('Field error response:', fieldError.response.status);
+                console.log('SUCCESS with METHOD 2');
+              } catch (error2) {
+                console.error('METHOD 2 failed:', error2);
+                if (isAxiosLikeError(error2)) {
+                  console.error('Error details:', error2.response?.status, error2.response?.data);
                 }
-                // Continue trying other IDs
+                
+                // METHOD 3: Try using different field format
+                try {
+                  console.log('METHOD 3: Using contact custom fields endpoint');
+                  await acClient.post(`/api/3/contactData`, {
+                    contactData: {
+                      contact: contactId,
+                      customFieldId: 7,
+                      customFieldValue: websiteUrl,
+                    }
+                  });
+                  console.log('SUCCESS with METHOD 3');
+                } catch (error3) {
+                  console.error('METHOD 3 failed:', error3);
+                  if (isAxiosLikeError(error3)) {
+                    console.error('Error details:', error3.response?.status, error3.response?.data);
+                  }
+                  
+                  // METHOD 4: Last attempt using PUT instead of POST
+                  try {
+                    console.log('METHOD 4: Using PUT on fieldValues');
+                    // Try to see if the field value already exists
+                    const fieldValuesResponse = await acClient.get(`/api/3/fieldValues?filters[contact]=${contactId}&filters[field]=7`);
+                    console.log('Field values response:', fieldValuesResponse.data);
+                    
+                    if (fieldValuesResponse.data?.fieldValues && Object.keys(fieldValuesResponse.data.fieldValues).length > 0) {
+                      // If exists, update it
+                      const fieldValueId = Object.keys(fieldValuesResponse.data.fieldValues)[0];
+                      await acClient.put(`/api/3/fieldValues/${fieldValueId}`, {
+                        fieldValue: {
+                          value: websiteUrl,
+                        },
+                      });
+                      console.log('SUCCESS with METHOD 4 (PUT existing field)');
+                    } else {
+                      // If doesn't exist, create it
+                      await acClient.post('/api/3/fieldValues', {
+                        fieldValue: {
+                          contact: contactId,
+                          field: 7,
+                          value: websiteUrl,
+                        },
+                      });
+                      console.log('SUCCESS with METHOD 4 (POST new field)');
+                    }
+                  } catch (error4) {
+                    console.error('METHOD 4 failed:', error4);
+                    if (isAxiosLikeError(error4)) {
+                      console.error('Error details:', error4.response?.status, error4.response?.data);
+                    }
+                    console.log('All methods failed to set website field');
+                  }
+                }
               }
             }
-          } catch (error) {
-            console.error('Error trying website field IDs:', error);
-            // Continue with the flow
+          } catch (mainError) {
+            console.error('Error in website field update process:', mainError);
           }
         }
       }
@@ -168,34 +237,103 @@ export const addContact = async (
         // Also try with hardcoded IDs for new contacts
         if (websiteUrl) {
           try {
-            // Field ID 7 is the confirmed Website field ID for this account, try others as fallbacks
-            const possibleWebsiteFieldIds = [process.env.AC_FIELD_WEBSITE, "7", "1", "28"];
+            // Field ID 7 is the confirmed Website field ID for this account, try as both string and number
+            // Also try different field formats and API endpoints
+            console.log(`Attempting to add website URL "${websiteUrl}" to contact ${contactId} using multiple methods`);
             
-            for (const fieldId of possibleWebsiteFieldIds) {
-              if (!fieldId) continue;
+            // METHOD 1: Try using fieldValues endpoint with numeric ID
+            try {
+              console.log('METHOD 1: Using fieldValues endpoint with numeric ID');
+              await acClient.post('/api/3/fieldValues', {
+                fieldValue: {
+                  contact: contactId,
+                  field: 7, // Use numeric value instead of string
+                  value: websiteUrl,
+                },
+              });
+              console.log('SUCCESS with METHOD 1');
+            } catch (error1) {
+              console.error('METHOD 1 failed:', error1);
+              if (isAxiosLikeError(error1)) {
+                console.error('Error details:', error1.response?.status, error1.response?.data);
+              }
               
+              // METHOD 2: Try using direct contact update with custom fields
               try {
-                console.log(`Trying to add website URL to custom field ID ${fieldId}`);
-                await acClient.post('/api/3/fieldValues', {
-                  fieldValue: {
-                    contact: contactId,
-                    field: fieldId,
-                    value: websiteUrl,
-                  },
+                console.log('METHOD 2: Using direct contact update with field_7');
+                await acClient.put(`/api/3/contacts/${contactId}`, {
+                  contact: {
+                    email,
+                    firstName,
+                    lastName,
+                    website: websiteUrl,
+                    // Try setting field directly in contact object
+                    field_7: websiteUrl
+                  }
                 });
-                console.log(`Successfully added website URL to custom field ID ${fieldId}`);
-                break; // Stop trying if successful
-              } catch (fieldError: unknown) {
-                console.error(`Error adding website URL to custom field ID ${fieldId}:`, fieldError);
-                if (isAxiosLikeError(fieldError)) {
-                  console.error('Field error response:', fieldError.response.status);
+                console.log('SUCCESS with METHOD 2');
+              } catch (error2) {
+                console.error('METHOD 2 failed:', error2);
+                if (isAxiosLikeError(error2)) {
+                  console.error('Error details:', error2.response?.status, error2.response?.data);
                 }
-                // Continue trying other IDs
+                
+                // METHOD 3: Try using different field format
+                try {
+                  console.log('METHOD 3: Using contact custom fields endpoint');
+                  await acClient.post(`/api/3/contactData`, {
+                    contactData: {
+                      contact: contactId,
+                      customFieldId: 7,
+                      customFieldValue: websiteUrl,
+                    }
+                  });
+                  console.log('SUCCESS with METHOD 3');
+                } catch (error3) {
+                  console.error('METHOD 3 failed:', error3);
+                  if (isAxiosLikeError(error3)) {
+                    console.error('Error details:', error3.response?.status, error3.response?.data);
+                  }
+                  
+                  // METHOD 4: Last attempt using PUT instead of POST
+                  try {
+                    console.log('METHOD 4: Using PUT on fieldValues');
+                    // Try to see if the field value already exists
+                    const fieldValuesResponse = await acClient.get(`/api/3/fieldValues?filters[contact]=${contactId}&filters[field]=7`);
+                    console.log('Field values response:', fieldValuesResponse.data);
+                    
+                    if (fieldValuesResponse.data?.fieldValues && Object.keys(fieldValuesResponse.data.fieldValues).length > 0) {
+                      // If exists, update it
+                      const fieldValueId = Object.keys(fieldValuesResponse.data.fieldValues)[0];
+                      await acClient.put(`/api/3/fieldValues/${fieldValueId}`, {
+                        fieldValue: {
+                          value: websiteUrl,
+                        },
+                      });
+                      console.log('SUCCESS with METHOD 4 (PUT existing field)');
+                    } else {
+                      // If doesn't exist, create it
+                      await acClient.post('/api/3/fieldValues', {
+                        fieldValue: {
+                          contact: contactId,
+                          field: 7,
+                          value: websiteUrl,
+                        },
+                      });
+                      console.log('SUCCESS with METHOD 4 (POST new field)');
+                    }
+                  } catch (error4) {
+                    console.error('METHOD 4 failed:', error4);
+                    if (isAxiosLikeError(error4)) {
+                      console.error('Error details:', error4.response?.status, error4.response?.data);
+                    }
+                    console.log('All methods failed to set website field');
+                  }
+                }
               }
             }
-          } catch (error) {
-            console.error('Error trying website field IDs:', error);
-            // Continue with the flow
+          } catch (mainError) {
+            console.error('Error in website field update process:', mainError);
           }
         }
       } catch (createError: unknown) {
