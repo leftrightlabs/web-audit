@@ -98,25 +98,36 @@ export const addContact = async (
             }
           });
           
-          // Also add website as a custom field if the field ID is set
-          const websiteFieldId = process.env.AC_FIELD_WEBSITE;
-          if (websiteFieldId) {
-            try {
-              console.log(`Adding website URL to custom field ID ${websiteFieldId}`);
-              await acClient.post('/api/3/fieldValues', {
-                fieldValue: {
-                  contact: contactId,
-                  field: websiteFieldId,
-                  value: websiteUrl,
-                },
-              });
-              console.log('Successfully added website URL to custom field');
-            } catch (fieldError: unknown) {
-              console.error('Error adding website URL to custom field:', fieldError);
-              if (isAxiosLikeError(fieldError)) {
-                console.error('Field error details:', fieldError.response.data);
+          // Try to update custom fields with hardcoded IDs if available
+          try {
+            // Common field IDs to try (1 is often the Website field in many AC accounts)
+            const possibleWebsiteFieldIds = [process.env.AC_FIELD_WEBSITE, "1", "28"];
+            
+            for (const fieldId of possibleWebsiteFieldIds) {
+              if (!fieldId) continue;
+              
+              try {
+                console.log(`Trying to add website URL to custom field ID ${fieldId}`);
+                await acClient.post('/api/3/fieldValues', {
+                  fieldValue: {
+                    contact: contactId,
+                    field: fieldId,
+                    value: websiteUrl,
+                  },
+                });
+                console.log(`Successfully added website URL to custom field ID ${fieldId}`);
+                break; // Stop trying if successful
+              } catch (fieldError: unknown) {
+                console.error(`Error adding website URL to custom field ID ${fieldId}:`, fieldError);
+                if (isAxiosLikeError(fieldError)) {
+                  console.error('Field error response:', fieldError.response.status);
+                }
+                // Continue trying other IDs
               }
             }
+          } catch (error) {
+            console.error('Error trying website field IDs:', error);
+            // Continue with the flow
           }
         }
       }
@@ -154,26 +165,37 @@ export const addContact = async (
         contactId = response.data.contact.id;
         console.log(`Created new contact with ID: ${contactId} and website: ${websiteUrl}`);
         
-        // Also add website as a custom field if the field ID is set
+        // Also try with hardcoded IDs for new contacts
         if (websiteUrl) {
-          const websiteFieldId = process.env.AC_FIELD_WEBSITE;
-          if (websiteFieldId) {
-            try {
-              console.log(`Adding website URL to custom field ID ${websiteFieldId}`);
-              await acClient.post('/api/3/fieldValues', {
-                fieldValue: {
-                  contact: contactId,
-                  field: websiteFieldId,
-                  value: websiteUrl,
-                },
-              });
-              console.log('Successfully added website URL to custom field');
-            } catch (fieldError: unknown) {
-              console.error('Error adding website URL to custom field:', fieldError);
-              if (isAxiosLikeError(fieldError)) {
-                console.error('Field error details:', fieldError.response.data);
+          try {
+            // Common field IDs to try (1 is often the Website field in many AC accounts)
+            const possibleWebsiteFieldIds = [process.env.AC_FIELD_WEBSITE, "1", "28"];
+            
+            for (const fieldId of possibleWebsiteFieldIds) {
+              if (!fieldId) continue;
+              
+              try {
+                console.log(`Trying to add website URL to custom field ID ${fieldId}`);
+                await acClient.post('/api/3/fieldValues', {
+                  fieldValue: {
+                    contact: contactId,
+                    field: fieldId,
+                    value: websiteUrl,
+                  },
+                });
+                console.log(`Successfully added website URL to custom field ID ${fieldId}`);
+                break; // Stop trying if successful
+              } catch (fieldError: unknown) {
+                console.error(`Error adding website URL to custom field ID ${fieldId}:`, fieldError);
+                if (isAxiosLikeError(fieldError)) {
+                  console.error('Field error response:', fieldError.response.status);
+                }
+                // Continue trying other IDs
               }
             }
+          } catch (error) {
+            console.error('Error trying website field IDs:', error);
+            // Continue with the flow
           }
         }
       } catch (createError: unknown) {
