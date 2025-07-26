@@ -1,11 +1,10 @@
 import React from 'react';
 import { AuditResult } from '@/types';
-import Button from './Button';
 
 interface ReportProps {
   auditResult: AuditResult;
-  userName: string;
-  userEmail: string;
+  // userName: string;
+  // userEmail: string;
   website: string;
   onDownloadPdf: () => void;
   onSendEmail: () => void;
@@ -15,8 +14,8 @@ interface ReportProps {
 
 const Report: React.FC<ReportProps> = ({
   auditResult,
-  userName,
-  userEmail,
+  // userName,
+  // userEmail,
   website,
   onDownloadPdf,
   onSendEmail,

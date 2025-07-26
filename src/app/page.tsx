@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FormData, AuditResult } from '@/types';
 import ProgressBar from '@/components/ProgressBar';
 import Landing from '@/components/Landing';
@@ -51,8 +51,8 @@ export default function Home() {
       // Update form data and proceed to next step (preferences)
       setFormData(prev => ({ ...prev, ...data }));
       setStep(2);
-    } catch (error: any) {
-      setError(error.message || 'An unexpected error occurred');
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
@@ -88,7 +88,7 @@ export default function Home() {
 
     try {
       // Update form data
-      const updatedFormData = { ...formData, ...data };
+      const updatedFormData = { ...formData, ...data } as FormData;
       setFormData(updatedFormData);
 
       // Now that we have the website URL, send the complete contact data to ActiveCampaign
@@ -156,9 +156,9 @@ export default function Home() {
         setAuditResult(result.data);
         setStep(4);
       }, 1000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       clearInterval(progressInterval);
-      setError(error.message || 'An unexpected error occurred');
+      setError(error instanceof Error ? error.message : 'An unexpected error occurred');
       // Stay on analysis step but show error
     } finally {
       setLoading(false);
@@ -198,8 +198,8 @@ export default function Home() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    } catch (error: any) {
-      setError(error.message || 'Failed to download PDF');
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : 'Failed to download PDF');
     } finally {
       setPdfLoading(false);
     }
@@ -247,8 +247,8 @@ export default function Home() {
 
       // Show success notification or message
       alert('PDF report sent to your email successfully!');
-    } catch (error: any) {
-      setError(error.message || 'Failed to send email');
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : 'Failed to send email');
     } finally {
       setEmailLoading(false);
     }
@@ -296,8 +296,6 @@ export default function Home() {
             {auditResult && (
               <Report 
                 auditResult={auditResult}
-                userName={formData.name}
-                userEmail={formData.email}
                 website={formData.website}
                 onDownloadPdf={handleDownloadPdf}
                 onSendEmail={handleSendEmail}

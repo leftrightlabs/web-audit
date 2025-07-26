@@ -94,10 +94,11 @@ Website Brand Audit Team
       success: true,
       message: 'PDF report sent successfully to your email',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error sending PDF by email:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to send email';
     return NextResponse.json(
-      { success: false, message: error.message || 'Failed to send email' },
+      { success: false, message: errorMessage },
       { status: 500 }
     );
   }

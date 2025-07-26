@@ -23,7 +23,7 @@ const LeadForm: React.FC<LeadFormProps> = ({ onSubmit, isLoading, defaultValues 
   return (
     <div className="w-full max-w-lg mx-auto px-4">
       <div className="text-center mb-10">
-        <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4 text-navy tracking-heading text-balance">Let's Get Started</h2>
+        <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4 text-navy tracking-heading text-balance">Let&apos;s Get Started</h2>
         <p className="text-lg text-gray-600 text-balance">Please provide your information to continue your free brand audit</p>
       </div>
       

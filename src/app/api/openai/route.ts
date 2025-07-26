@@ -72,10 +72,11 @@ export async function POST(req: NextRequest) {
       message: 'Website analyzed successfully',
       data: auditResult,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in OpenAI API:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to analyze website';
     return NextResponse.json(
-      { success: false, message: error.message || 'Failed to analyze website' },
+      { success: false, message: errorMessage },
       { status: 500 }
     );
   }

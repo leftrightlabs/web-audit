@@ -10,15 +10,26 @@ export const isSupabaseConfigured = (): boolean => {
   return Boolean(supabaseUrl && supabaseAnonKey);
 };
 
+// Define a simplified type for the mock client that matches our usage
+type MockSupabaseClient = {
+  from: (table: string) => {
+    insert: (data: Record<string, unknown>) => {
+      select: (columns: string) => {
+        single: () => Promise<{ data: { id: string }; error: null }>;
+      };
+    };
+  };
+};
+
 // Create a mock client for when credentials are missing
-const createMockClient = () => {
+const createMockClient = (): MockSupabaseClient => {
   // This creates a mock client that logs operations but doesn't actually connect to Supabase
   return {
     from: (table: string) => ({
-      insert: (data: any) => {
+      insert: (data: Record<string, unknown>) => {
         console.log(`[Mock Supabase] Would insert into ${table}:`, data);
         return {
-          select: (column: string) => ({
+          select: () => ({
             single: () => Promise.resolve({ 
               data: { id: 'mock-id-' + Date.now() }, 
               error: null 
@@ -26,16 +37,15 @@ const createMockClient = () => {
           })
         };
       }
-    }),
-    // Add other methods as needed
-  } as any;
+    })
+  };
 };
 
 // Create a Supabase client with the public anon key for client-side usage
 // Or return a mock client if credentials are missing
 export const supabase = isSupabaseConfigured() 
   ? createClient<Database>(supabaseUrl, supabaseAnonKey)
-  : createMockClient();
+  : createMockClient() as unknown as ReturnType<typeof createClient<Database>>;
 
 // For server-side operations (API routes) with service role key
 // This should never be exposed to the client
@@ -49,7 +59,7 @@ export const getSupabaseAdmin = () => {
   // If not configured, return a mock client
   if (!isSupabaseConfigured() || !supabaseServiceKey) {
     console.warn('Supabase admin client not configured. Using mock client.');
-    return createMockClient();
+    return createMockClient() as unknown as ReturnType<typeof createClient<Database>>;
   }
   
   supabaseAdmin = createClient<Database>(supabaseUrl, supabaseServiceKey, {

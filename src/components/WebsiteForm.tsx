@@ -1,8 +1,13 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { websiteFormSchema, WebsiteFormValues } from '@/lib/schema';
+import { preferencesFormSchema } from '@/lib/schema';
 import Button from './Button';
+
+// Define a simplified type just for the website field
+type WebsiteFormValues = {
+  website: string;
+};
 
 interface WebsiteFormProps {
   onSubmit: (data: WebsiteFormValues) => void;
@@ -22,7 +27,7 @@ const WebsiteForm: React.FC<WebsiteFormProps> = ({
     handleSubmit,
     formState: { errors },
   } = useForm<WebsiteFormValues>({
-    resolver: zodResolver(websiteFormSchema),
+    resolver: zodResolver(preferencesFormSchema.pick({ website: true })),
     defaultValues,
   });
 

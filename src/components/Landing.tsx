@@ -1,5 +1,4 @@
 import React from 'react';
-import Button from './Button';
 
 interface LandingProps {
   onStart: () => void;
@@ -36,7 +35,7 @@ const Landing: React.FC<LandingProps> = ({ onStart }) => {
               Your Brand. Digital. Your Business. Defined.
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto text-balance">
-              Make Your Brand's Voice Heard
+              Make Your Brand&apos;s Voice Heard
             </p>
           </div>
 
@@ -73,7 +72,7 @@ const Landing: React.FC<LandingProps> = ({ onStart }) => {
               </div>
               <h3 className="font-heading text-xl font-bold mb-3 text-navy text-center group-hover:text-purple transition-colors text-balance">Actionable Recommendations</h3>
               <p className="text-gray-600 text-center text-balance">
-                Get tailored next steps and practical improvements to enhance your website's effectiveness.
+                Get tailored next steps and practical improvements to enhance your website&apos;s effectiveness.
               </p>
             </div>
           </div>
@@ -100,7 +99,7 @@ const Landing: React.FC<LandingProps> = ({ onStart }) => {
             <div className="flex flex-col items-center text-center">
               <div className="w-16 h-16 bg-navy rounded-full flex items-center justify-center text-white font-bold mb-6 text-xl shadow-md">3</div>
               <h3 className="font-heading font-bold mb-3 text-lg text-navy text-balance">AI Analysis</h3>
-              <p className="text-gray-600 text-balance">Our AI evaluates your website's branding & design</p>
+              <p className="text-gray-600 text-balance">Our AI evaluates your website&apos;s branding & design</p>
             </div>
             
             <div className="flex flex-col items-center text-center">
@@ -125,7 +124,7 @@ const Landing: React.FC<LandingProps> = ({ onStart }) => {
               <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-white flex-shrink-0"></div>
               <div>
                 <p className="text-lg md:text-xl text-gray-700 mb-4 italic text-balance">
-                  "The brand audit helped us identify key areas where our messaging wasn't consistent. Within weeks of implementing the recommendations, our conversion rate increased by 27%."
+                  &quot;The brand audit helped us identify key areas where our messaging wasn&apos;t consistent. Within weeks of implementing the recommendations, our conversion rate increased by 27%.&quot;
                 </p>
                 <p className="font-bold text-navy">Sarah Johnson</p>
                 <p className="text-gray-600">Marketing Director, TechSolutions Inc.</p>

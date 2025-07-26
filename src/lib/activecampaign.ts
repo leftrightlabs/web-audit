@@ -1,5 +1,26 @@
 import axios from 'axios';
 
+// Define a type for axios-like error responses
+interface AxiosLikeError {
+  response: {
+    status: number;
+    data: unknown;
+  };
+}
+
+// Helper function to check if an object is an axios-like error
+function isAxiosLikeError(obj: unknown): obj is AxiosLikeError {
+  return (
+    obj !== null &&
+    typeof obj === 'object' &&
+    'response' in obj &&
+    obj.response !== null &&
+    typeof obj.response === 'object' &&
+    'status' in obj.response &&
+    'data' in obj.response
+  );
+}
+
 // Initialize ActiveCampaign configuration
 const initActiveCampaign = () => {
   const apiUrl = process.env.AC_API_URL;
@@ -45,7 +66,8 @@ export const addContact = async (
   marketingCampaigns?: string
 ) => {
   try {
-    const { apiUrl, apiKey } = initActiveCampaign();
+    // Initialize ActiveCampaign client (apiUrl and apiKey are used within initActiveCampaign)
+    initActiveCampaign();
 
     // Split name into first and last name
     const nameParts = name.trim().split(' ');
@@ -67,10 +89,10 @@ export const addContact = async (
         contactId = contacts[0].id;
         console.log(`Found existing contact with ID: ${contactId}`);
       }
-    } catch (findError) {
+    } catch (findError: unknown) {
       console.error('Error searching for existing contact:', findError);
       // Log more details if it's an Axios error
-      if (findError.response) {
+      if (isAxiosLikeError(findError)) {
         console.error('Response status:', findError.response.status);
         console.error('Response data:', findError.response.data);
       }
@@ -99,9 +121,9 @@ export const addContact = async (
 
         contactId = response.data.contact.id;
         console.log(`Created new contact with ID: ${contactId}`);
-      } catch (createError) {
+      } catch (createError: unknown) {
         console.error('Error creating contact:', createError);
-        if (createError.response) {
+        if (isAxiosLikeError(createError)) {
           console.error('Response status:', createError.response.status);
           console.error('Response data:', createError.response.data);
         }
@@ -132,10 +154,10 @@ export const addContact = async (
       contactId,
       addedToList: listResult
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error adding contact to ActiveCampaign:', error);
     // Log more details if it's an Axios error
-    if (error.response) {
+    if (isAxiosLikeError(error)) {
       console.error('Response status:', error.response.status);
       console.error('Response data:', error.response.data);
     }
@@ -237,23 +259,34 @@ const addContactToList = async (contactId: string, listId: number) => {
     // Add contact to list
     await acClient.post('/api/3/contactLists', listData);
     return true;
-  } catch (error) {
+  } catch (error: unknown) {
     // There are several ways the API might indicate "already on list"
-    const errorMessage = error.response?.data?.message || '';
-    const errorTitle = error.response?.data?.errors?.[0]?.title || '';
-    
-    if (
-      errorMessage.includes('already on list') || 
-      errorTitle.includes('already on list') ||
-      error.response?.status === 422  // Unprocessable Entity often indicates duplicate
-    ) {
-      console.log(`Contact ${contactId} appears to be already on list ${listId}`);
-      return true; // Consider this a success
-    }
-    
-    console.error(`Error adding contact ${contactId} to list ${listId}:`, error);
-    if (error.response?.data) {
+    if (isAxiosLikeError(error)) {
+      const responseData = error.response.data as Record<string, unknown>;
+      const errorMessage = typeof responseData.message === 'string' ? responseData.message : '';
+      const errorTitle = responseData.errors && 
+                         Array.isArray(responseData.errors) && 
+                         responseData.errors.length > 0 && 
+                         typeof responseData.errors[0] === 'object' && 
+                         responseData.errors[0] !== null && 
+                         'title' in responseData.errors[0] && 
+                         typeof responseData.errors[0].title === 'string' 
+                           ? responseData.errors[0].title 
+                           : '';
+      
+      if (
+        errorMessage.includes('already on list') || 
+        errorTitle.includes('already on list') ||
+        error.response?.status === 422  // Unprocessable Entity often indicates duplicate
+      ) {
+        console.log(`Contact ${contactId} appears to be already on list ${listId}`);
+        return true; // Consider this a success
+      }
+      
+      console.error(`Error adding contact ${contactId} to list ${listId}:`, error);
       console.error('Error details:', JSON.stringify(error.response.data));
+    } else {
+      console.error(`Error adding contact ${contactId} to list ${listId}:`, error);
     }
     return false;
   }
@@ -265,19 +298,19 @@ export const testConnection = async (): Promise<{ success: boolean; message: str
     const { acClient, apiUrl } = initActiveCampaign();
     
     // Try to make a simple GET request to the API
-    const response = await acClient.get('/api/3/users');
+    await acClient.get('/api/3/users');
     
     return {
       success: true,
       message: `Successfully connected to ActiveCampaign API at ${apiUrl}`
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('ActiveCampaign connection test failed:', error);
     
     let errorMessage = 'Failed to connect to ActiveCampaign API';
-    if (error.response) {
+    if (isAxiosLikeError(error)) {
       errorMessage += ` - Status: ${error.response.status}, Message: ${JSON.stringify(error.response.data)}`;
-    } else if (error.message) {
+    } else if (error instanceof Error) {
       errorMessage += ` - ${error.message}`;
     }
     

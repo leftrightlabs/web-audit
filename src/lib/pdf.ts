@@ -12,7 +12,7 @@ export const generatePDF = (auditResult: AuditResult, userData: FormData): Blob 
   
   // Define colors
   const primaryColor = '#21145f'; // RGB 33, 20, 95
-  const accentColor = '#7950f2'; // RGB 121, 80, 242
+  // const accentColor = '#7950f2'; // RGB 121, 80, 242
   
   // Add title
   doc.setFontSize(24);
@@ -82,7 +82,7 @@ export const generatePDF = (auditResult: AuditResult, userData: FormData): Blob 
   });
   
   // Get the last y position after the strengths table
-  yPos = (doc as any).lastAutoTable.finalY + 10;
+  yPos = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
   
   // Check if we need a new page
   if (yPos > 250) {
@@ -107,7 +107,7 @@ export const generatePDF = (auditResult: AuditResult, userData: FormData): Blob 
   });
   
   // Get the last y position after the weaknesses table
-  yPos = (doc as any).lastAutoTable.finalY + 10;
+  yPos = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
   
   // Check if we need a new page
   if (yPos > 240) {
@@ -136,7 +136,7 @@ export const generatePDF = (auditResult: AuditResult, userData: FormData): Blob 
   });
   
   // Get the last y position after the actionable steps table
-  yPos = (doc as any).lastAutoTable.finalY + 10;
+  yPos = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
   
   // Check if we need a new page
   if (yPos > 240) {

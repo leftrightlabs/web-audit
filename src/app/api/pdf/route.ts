@@ -51,10 +51,11 @@ export async function POST(req: NextRequest) {
       
       throw pdfError;
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in PDF generation API:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to generate PDF';
     return NextResponse.json(
-      { success: false, message: error.message || 'Failed to generate PDF' },
+      { success: false, message: errorMessage },
       { status: 500 }
     );
   }

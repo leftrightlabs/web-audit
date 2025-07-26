@@ -28,7 +28,7 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
   const questions: Question[] = [
     {
       id: 'websiteGoal',
-      label: "What's your primary goal for your website?",
+      label: "What&apos;s your primary goal for your website?",
       options: [
         'Generate leads',
         'Sell products',
@@ -51,17 +51,17 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
     },
     {
       id: 'targetAudience',
-      label: "Who is your ideal customer or audience?",
+      label: "Who is your target audience?",
       options: [
         'Consumers (B2C)',
         'Businesses (B2B)',
         'Nonprofits / Education',
-        'I\'m not sure'
+        'I&apos;m not sure'
       ]
     },
     {
       id: 'brandPersonality',
-      label: "How would you describe your brand's personality?",
+      label: "How would you describe your brand&apos;s personality?",
       options: [
         'Professional & Polished',
         'Bold & Energetic',
@@ -98,24 +98,18 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
   const totalSteps = questions.length;
   const progress = ((currentQuestionIndex + 2) / (totalSteps + 1)) * 100; // +2 because we start at -1 and need to count the website URL step
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    watch,
-    formState: { errors },
-    getValues,
-    setValue
-  } = useForm<PreferencesFormValues>({
+  // Form setup
+  const { register, handleSubmit, control, watch, formState: { errors }, setValue, /* getValues */ } = useForm<PreferencesFormValues>({
     resolver: zodResolver(preferencesFormSchema),
-    defaultValues,
+    defaultValues: { website: defaultValues.website || '', ...defaultValues }
   });
   
   const watchWebsite = watch('website');
 
   // Handle radio selection
   const handleRadioChange = (questionId: keyof Omit<PreferencesFormValues, 'website'>, value: string) => {
-    setValue(questionId, value as any);
+    // Cast value to the appropriate enum type
+    setValue(questionId, value as PreferencesFormValues[typeof questionId]);
     if (currentQuestionIndex < questions.length - 1) {
       // Automatically advance to the next question
       setCurrentQuestionIndex(prev => prev + 1);
@@ -123,11 +117,13 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
   };
 
   // Handle next and previous buttons
+  /* 
   const goToNextQuestion = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
     }
   };
+  */
 
   const goToPreviousQuestion = () => {
     if (currentQuestionIndex > -1) {
@@ -205,7 +201,7 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
         <div className="py-4 text-center">
           <h3 className="font-heading text-2xl font-bold mb-4 text-navy">Ready to analyze your website!</h3>
           <p className="text-gray-600 mb-6">
-            Thanks for providing this information. We'll use it to create a customized report for your website.
+            Thanks for providing this information. We&apos;ll use it to create a customized report for your website.
           </p>
           <div className="flex flex-col md:flex-row gap-4">
             <Button 
