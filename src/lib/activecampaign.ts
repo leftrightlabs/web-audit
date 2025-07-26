@@ -66,9 +66,6 @@ export const addContact = async (
   marketingCampaigns?: string
 ) => {
   try {
-    // Initialize ActiveCampaign client (apiUrl and apiKey are used within initActiveCampaign)
-    initActiveCampaign();
-
     // Split name into first and last name
     const nameParts = name.trim().split(' ');
     const firstName = nameParts[0] || '';
@@ -88,6 +85,19 @@ export const addContact = async (
         // Contact exists, use existing ID
         contactId = contacts[0].id;
         console.log(`Found existing contact with ID: ${contactId}`);
+        
+        // Update the existing contact with the website URL if provided
+        if (websiteUrl) {
+          console.log(`Updating existing contact with website URL: ${websiteUrl}`);
+          await acClient.put(`/api/3/contacts/${contactId}`, {
+            contact: {
+              email,
+              firstName,
+              lastName,
+              website: websiteUrl, // Using standard website field
+            }
+          });
+        }
       }
     } catch (findError: unknown) {
       console.error('Error searching for existing contact:', findError);
@@ -107,6 +117,7 @@ export const addContact = async (
           email,
           firstName,
           lastName,
+          website: websiteUrl, // Using standard website field directly
         },
       };
 
@@ -120,7 +131,7 @@ export const addContact = async (
         }
 
         contactId = response.data.contact.id;
-        console.log(`Created new contact with ID: ${contactId}`);
+        console.log(`Created new contact with ID: ${contactId} and website: ${websiteUrl}`);
       } catch (createError: unknown) {
         console.error('Error creating contact:', createError);
         if (isAxiosLikeError(createError)) {
@@ -131,10 +142,9 @@ export const addContact = async (
       }
     }
 
-    // Always add custom fields if provided (website URL is most important)
-    if (websiteUrl || websiteGoal || industryType || marketingCampaigns) {
+    // Add other custom fields if provided (not including website URL since we're using the standard field)
+    if (websiteGoal || industryType || marketingCampaigns) {
       await addCustomFields(contactId, {
-        websiteUrl,
         websiteGoal,
         industryType,
         marketingCampaigns,
@@ -142,7 +152,7 @@ export const addContact = async (
     }
 
     // ALWAYS add contact to List ID 36 regardless of other fields
-    console.log(`Adding contact ID ${contactId} to List ID 36 (even without website URL)`);
+    console.log(`Adding contact ID ${contactId} to List ID 36`);
     const listResult = await addContactToList(contactId, 36);
     
     if (!listResult) {
@@ -169,7 +179,6 @@ export const addContact = async (
 const addCustomFields = async (
   contactId: string,
   fields: {
-    websiteUrl?: string;
     websiteGoal?: string;
     industryType?: string;
     marketingCampaigns?: string;
@@ -180,7 +189,6 @@ const addCustomFields = async (
 
     // Map of field names to their IDs (these would need to be created in ActiveCampaign first)
     const fieldIds = {
-      websiteUrl: process.env.AC_FIELD_WEBSITE,
       websiteGoal: process.env.AC_FIELD_GOAL,
       industryType: process.env.AC_FIELD_INDUSTRY,
       marketingCampaigns: process.env.AC_FIELD_MARKETING,
@@ -189,31 +197,9 @@ const addCustomFields = async (
     // Keep track of which fields were successfully added
     const results: Record<string, boolean> = {};
 
-    // Add website URL (most important field)
-    if (fields.websiteUrl) {
-      try {
-        if (fieldIds.websiteUrl) {
-          await acClient.post('/api/3/fieldValues', {
-            fieldValue: {
-              contact: contactId,
-              field: fieldIds.websiteUrl,
-              value: fields.websiteUrl,
-            },
-          });
-          results.websiteUrl = true;
-        } else {
-          // Log website URL even if we don't have a field ID for it
-          console.log(`No field ID configured for website URL, but value is: ${fields.websiteUrl}`);
-        }
-      } catch (error) {
-        console.error(`Error adding website URL field:`, error);
-        results.websiteUrl = false;
-      }
-    }
-
-    // Add other fields if available
+    // Add fields if they have values and field IDs
     for (const [fieldName, fieldValue] of Object.entries(fields)) {
-      if (fieldName === 'websiteUrl' || !fieldValue) continue; // Skip website URL (already handled) and empty values
+      if (!fieldValue) continue; // Skip empty values
 
       const fieldIdKey = fieldName as keyof typeof fieldIds;
       const fieldId = fieldIds[fieldIdKey];
@@ -228,10 +214,14 @@ const addCustomFields = async (
             },
           });
           results[fieldName] = true;
+          console.log(`Added custom field ${fieldName}: ${fieldValue}`);
         } catch (error) {
           console.error(`Error adding ${fieldName} field:`, error);
           results[fieldName] = false;
         }
+      } else if (fieldValue) {
+        // Log when we have a value but no field ID configured
+        console.log(`No field ID configured for ${fieldName}, but value is: ${fieldValue}`);
       }
     }
 
