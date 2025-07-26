@@ -134,8 +134,13 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
     }
   };
 
-  // Final submit handler
+  // Handle form submission
   const onFormSubmit = (data: PreferencesFormValues) => {
+    // Always allow form submission if the website URL is valid
+    // (which is ensured by validation)
+    console.log("Submitting form data:", data);
+    
+    // Call the onSubmit prop with the data
     onSubmit(data);
   };
 
@@ -219,8 +224,8 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
               size="lg" 
               fullWidth 
               isLoading={isLoading}
-              // Remove any disabled condition - the submit button should always be enabled on the review screen
-              // since all necessary fields (just the website URL) are already validated
+              // This button should ALWAYS be enabled on the review screen
+              // The website field is already validated before getting here
             >
               Review & Submit
             </Button>
@@ -287,7 +292,7 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
               undefined}
             disabled={!isCurrentQuestionAnswered()}
           >
-            {currentQuestionIndex === questions.length - 1 ? "Review & Submit" : "Skip / Continue"}
+            {currentQuestionIndex === questions.length - 1 ? "Continue to Review" : "Skip / Continue"}
           </Button>
         </div>
       </div>
