@@ -56,7 +56,7 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
         'Consumers (B2C)',
         'Businesses (B2B)',
         'Nonprofits / Education',
-        'I&apos;m not sure'
+        'I\'m not sure'
       ]
     },
     {
@@ -74,9 +74,9 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
       id: 'marketingCampaigns',
       label: "Are you currently running any marketing or ad campaigns?",
       options: [
-        'Yes – Social Media Ads',
-        'Yes – Google Ads',
-        'No – Not yet',
+        'Yes - Social Media Ads',
+        'Yes - Google Ads',
+        'No - Not yet',
         'Not sure'
       ]
     },
@@ -272,8 +272,8 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
                   key={option} 
                   className={`group flex items-center p-4 border rounded-lg cursor-pointer transition-all 
                     ${field.value === option 
-                      ? 'border-navy bg-navy text-white' 
-                      : 'border-gray-200 hover:border-[#923a80] hover:bg-[#923a80] hover:text-white'}`}
+                      ? 'border-navy bg-navy text-white shadow-lg' 
+                      : 'border-gray-200 bg-gray-50 hover:border-[#923a80] hover:bg-[#923a80] hover:text-white shadow-sm'}`}
                   onClick={() => handleRadioChange(question.id, option)}
                 >
                   <input
@@ -306,11 +306,27 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
             size="lg" 
             fullWidth 
             onClick={isCurrentQuestionAnswered() ? 
-              () => setCurrentQuestionIndex(currentQuestionIndex + 1) : 
-              undefined}
+              () => {
+                if (currentQuestionIndex === questions.length - 1) {
+                  // Last question – submit form immediately
+                  const formValues = {
+                    website: watch('website'),
+                    websiteGoal: watch('websiteGoal'),
+                    industryType: watch('industryType'),
+                    targetAudience: watch('targetAudience'),
+                    brandPersonality: watch('brandPersonality'),
+                    marketingCampaigns: watch('marketingCampaigns'),
+                    improvementArea: watch('improvementArea'),
+                  } as PreferencesFormValues;
+                  onSubmit(formValues);
+                } else {
+                  // Advance to next question (or review)
+                  setCurrentQuestionIndex(currentQuestionIndex + 1);
+                }
+              } : undefined}
             disabled={!isCurrentQuestionAnswered()}
           >
-            {currentQuestionIndex === questions.length - 1 ? "Continue to Review" : "Skip / Continue"}
+            {currentQuestionIndex === questions.length - 1 ? "Submit" : "Skip / Continue"}
           </Button>
         </div>
       </div>
@@ -332,8 +348,8 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
         ></div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-8 md:p-10 border border-gray-100">
-        {/* Only use the form element for questions, not for the final review screen */}
+      <div className="bg-gradient-to-b from-white to-gray-50 rounded-xl shadow-xl p-8 md:p-10 border border-gray-100">
+        {/* Render questions only; final review screen removed */}
         {currentQuestionIndex < questions.length ? (
           <form 
             onSubmit={(e) => {

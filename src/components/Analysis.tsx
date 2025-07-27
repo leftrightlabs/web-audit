@@ -62,7 +62,7 @@ const Analysis: React.FC<AnalysisProps> = ({ progress }) => {
                 <div className="flex justify-between items-center">
                   <span className={`text-base ${index === currentStep ? 'font-medium' : ''}`}>{step.label}</span>
                   {index === currentStep && (
-                    <span className="text-xs bg-navy bg-opacity-10 text-navy px-2 py-1 rounded font-medium">In Progress</span>
+                    <span className="text-xs bg-purple text-white px-2 py-1 rounded font-medium">In Progress</span>
                   )}
                 </div>
                 {index === currentStep && (
