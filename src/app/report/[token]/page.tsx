@@ -88,9 +88,7 @@ export default function ReportViewerPage({ params }: PageProps) {
             lighthouseData={lighthouseData}
             website={website}
             onDownloadPdf={() => {}}
-            onSendEmail={() => {}}
             isGeneratingPdf={false}
-            isSendingEmail={false}
           />
         </div>
       </main>
