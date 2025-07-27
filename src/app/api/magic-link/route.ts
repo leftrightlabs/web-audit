@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     const origin =
       req.headers.get('origin') ||
       process.env.NEXT_PUBLIC_BASE_URL ||
-      'http://localhost:3000';
+      'https://audit.leftrightlabs.com';
 
     // Construct the short shareable URL
     const shareUrl = `${origin}/report/${shortId}`;
