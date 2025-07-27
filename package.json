@@ -22,10 +22,13 @@
     "next": "15.4.4",
     "nodemailer": "^7.0.5",
     "openai": "^5.10.2",
+    "jsonwebtoken": "^9.0.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.61.1",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "chart.js": "^4.5.0",
+    "react-chartjs-2": "^5.2.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

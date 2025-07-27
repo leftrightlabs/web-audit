@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { analyzeWebsite } from '@/lib/openai';
-import { AuditResult } from '@/types';
+import { getLighthouseMetrics } from '@/lib/pagespeed';
+import { AuditResult, LighthouseData } from '@/types';
 
 // Mock data for testing without an API key
 const mockAuditResult: AuditResult = {
@@ -36,7 +37,14 @@ const mockAuditResult: AuditResult = {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { website, businessGoal, industry, runningAds } = body;
+    const {
+      website,
+      businessGoal,
+      industry,
+      runningAds,
+      targetAudience,
+      brandPersonality
+    } = body;
 
     // Validate required field
     if (!website) {
@@ -62,20 +70,38 @@ export async function POST(req: NextRequest) {
         throw new Error('OpenAI API key is not configured on the server');
       }
 
+      // Fetch Lighthouse metrics in parallel
+      const lighthousePromise = getLighthouseMetrics(website);
+
       // Use real OpenAI API
-      auditResult = await analyzeWebsite(
+      const analysisPromise = analyzeWebsite(
         website,
         businessGoal,
         industry,
-        runningAds
+        runningAds,
+        targetAudience,
+        brandPersonality
       );
-    }
+
+      const [lighthouseData] = await Promise.all([
+        lighthousePromise,
+        analysisPromise,
+      ]);
+
+      auditResult = await analysisPromise;
+
+      // Combine audit result with Lighthouse data
+      const responseData = {
+        ...auditResult,
+        lighthouseData,
+      };
 
     return NextResponse.json({
       success: true,
       message: 'Website analyzed successfully',
-      data: auditResult,
+      data: responseData,
     });
+    }
   } catch (error: unknown) {
     console.error('Error in OpenAI API:', error);
     const errorMessage = error instanceof Error ? error.message : 'Failed to analyze website';

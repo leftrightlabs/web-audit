@@ -62,33 +62,71 @@ export const buildPrompt = (
   businessGoal?: string,
   industry?: string,
   runningAds?: string,
+  targetAudience?: string,
+  brandPersonality?: string,
   extractedText?: string
 ): string => {
   return `
-    You are a senior branding strategist who specializes in high-impact online presence for businesses in the ${industry || 'given'} industry. Your task is to carry out a thorough yet easy-to-understand website brand audit. Examine the website content below in the context of best-in-class practices for this industry and the stated business goal. Speak directly to a busy founder or marketing lead – be clear, constructive, and avoid generic fluff.
+    You are a seasoned brand strategist and UX expert. Your task is to perform a full brand audit based on the provided website content and details. Assume the site is live and customer-facing.
 
+    First, carefully evaluate the website in these four key areas:
+    1. Branding and Positioning (clarity, consistency, voice)
+    2. User Experience (UX) and Design (navigation, CTAs, aesthetics)
+    3. Conversion and Trust (credibility, funnels, value proposition)
+    4. Content and SEO (relevance, optimization, engagement)
+
+    After your evaluation, generate a response in the following JSON format:
+
+    {
+      "summary": "A personalized brand audit summary, written in a helpful and professional tone, integrating your findings from the four key areas.",
+      "strengths": [
+        "A bulleted list of 3-5 key strengths of the website, based on your analysis.",
+        "Each point should be a concise sentence."
+      ],
+      "weaknesses": [
+        "A bulleted list of 3-5 critical weaknesses or areas for improvement.",
+        "Be specific and constructive in your feedback."
+      ],
+      "actionableSteps": [
+        "The Top 3 most important, high-impact next steps the business owner should take.",
+        "Each step should be clearly explained and actionable.",
+        "This section's content should correspond to a section titled 'Top 3 Recommended Next Steps' in a human-readable report."
+      ],
+      "improvements": [
+        "2-3 additional tailored suggestions for improvement, kept concise."
+      ],
+      "pillarScores": {
+        "branding": 85,
+        "ux": 78,
+        "conversion": 70,
+        "content": 82
+      },
+      "colorPalette": ["#21145f", "#7950f2", "#f2f2f2"],
+      "fonts": ["Inter", "Roboto"]
+    }
+    
+    ---
+    IMPORTANT CONTEXT
+    ---
     Website URL: ${url}
     ${businessGoal ? `Primary Business Goal: ${businessGoal}` : ''}
     ${industry ? `Industry: ${industry}` : ''}
     ${runningAds ? `Currently Running Paid Ads: ${runningAds}` : ''}
-
-    -------------
-    WEBSITE CONTENT EXTRACT
-    -------------
+    ${targetAudience ? `Ideal Audience: ${targetAudience}` : ''}
+    ${brandPersonality ? `Desired Brand Personality: ${brandPersonality}` : ''}
+    
+    ---
+    WEBSITE CONTENT FOR ANALYSIS
+    ---
     ${extractedText || '[Content will be fetched during analysis]'}
-    -------------
+    ---
 
-    After carefully reviewing the site, return a JSON object with the following keys exactly: summary, strengths, weaknesses, actionableSteps, improvements.
+    Replace all example values with the actual values you calculate. Use ONLY:
+    • Numbers (0-100) for pillarScores.
+    • Valid hex strings (e.g. "#1e90ff") for colorPalette.
+    • Plain font family names for fonts.
 
-    Requirements for each key:
-
-    1. summary – 1–2 short paragraphs that evaluate the overall brand experience, written in second person and referencing their industry to make it feel personalized (e.g. "As a B2B SaaS company…").
-    2. strengths – an array with 3-5 bullet points describing concrete brand/design/UX strengths. Each bullet should be 1 concise sentence.
-    3. weaknesses – an array with 3-5 bullet points highlighting the most critical gaps or inconsistencies. Be specific and root the feedback in industry expectations.
-    4. actionableSteps – an array containing ONLY the Top 3 most important next steps, prioritized by impact. Each step should start with an imperative verb, include a short rationale, and, where helpful, an example.
-    5. improvements – an array with 2-3 additional tailored suggestions that link directly to their ${industry || 'industry'} context and their ${businessGoal ? businessGoal.toLowerCase() : 'business'} goals.
-
-    Reply ONLY with valid JSON that matches the schema described above. Do not wrap your answer in markdown or add any extraneous text.
+    Provide ONLY the valid JSON object as your response. Do NOT include any text or markdown before or after the JSON.
   `;
 };
 
@@ -97,7 +135,9 @@ export const analyzeWebsite = async (
   url: string,
   businessGoal?: string,
   industry?: string,
-  runningAds?: string
+  runningAds?: string,
+  targetAudience?: string,
+  brandPersonality?: string
 ): Promise<AuditResult> => {
   try {
     const client = initOpenAI();
@@ -105,7 +145,7 @@ export const analyzeWebsite = async (
     const extractedText = extractTextFromHtml(websiteContent);
     
     // Use the buildPrompt function
-    const prompt = buildPrompt(url, businessGoal, industry, runningAds, extractedText);
+    const prompt = buildPrompt(url, businessGoal, industry, runningAds, targetAudience, brandPersonality, extractedText);
 
     const response = await client.chat.completions.create({
       model: 'gpt-4-turbo',

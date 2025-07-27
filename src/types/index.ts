@@ -28,6 +28,24 @@ export interface AuditResult {
   weaknesses: string[];
   actionableSteps: string[];
   improvements: string[];
+  // Optional enriched fields for the enhanced report
+  pillarScores?: {
+    branding: number; // Branding & Positioning 0-100
+    ux: number;       // UX & Design 0-100
+    conversion: number; // Conversion & Trust 0-100
+    content: number;  // Content & SEO 0-100
+  };
+  /** Hex color values extracted from the site (e.g. ["#21145f", "#7950f2", ...]) */
+  colorPalette?: string[];
+  /** Top fonts detected on the site (e.g. ["Inter", "Roboto"]) */
+  fonts?: string[];
+}
+
+export interface LighthouseData {
+  performance: number;
+  accessibility: number;
+  bestPractices: number;
+  seo: number;
 }
 
 export interface ApiResponse {

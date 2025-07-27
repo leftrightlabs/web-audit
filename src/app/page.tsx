@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Toast from '@/components/Toast';
-import { FormData, AuditResult } from '@/types';
+import { FormData, AuditResult, LighthouseData } from '@/types';
 import ProgressBar from '@/components/ProgressBar';
 import Landing from '@/components/Landing';
 import LeadForm from '@/components/LeadForm';
@@ -19,6 +19,9 @@ export default function Home() {
     website: '',
   });
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
+  const [lighthouseData, setLighthouseData] = useState<LighthouseData | null>(
+    null
+  );
   const [loading, setLoading] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [pdfLoading, setPdfLoading] = useState(false);
@@ -126,6 +129,8 @@ export default function Home() {
         businessGoal: updatedFormData.websiteGoal, // formerly websiteGoal
         industry: updatedFormData.industryType,    // formerly industryType
         runningAds: updatedFormData.marketingCampaigns, // formerly marketingCampaigns
+        targetAudience: updatedFormData.targetAudience,
+        brandPersonality: updatedFormData.brandPersonality,
       };
 
       const response = await fetch('/api/openai', {
@@ -157,6 +162,7 @@ export default function Home() {
       // Set audit result and move to report step after a short delay
       setTimeout(() => {
         setAuditResult(result.data);
+        setLighthouseData(result.data.lighthouseData || null);
         setStep(4);
       }, 1000);
     } catch (error: unknown) {
@@ -306,6 +312,7 @@ export default function Home() {
             {auditResult && (
               <Report 
                 auditResult={auditResult}
+                lighthouseData={lighthouseData}
                 website={formData.website}
                 onDownloadPdf={handleDownloadPdf}
                 onSendEmail={handleSendEmail}
