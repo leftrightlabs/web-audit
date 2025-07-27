@@ -21,19 +21,19 @@ const Button: React.FC<ButtonProps> = ({
   disabled = false,
   onClick
 }) => {
-  const baseClasses = "rounded-md font-medium transition-all duration-200 flex items-center justify-center shadow-sm";
+  const baseClasses = "rounded-xl font-medium transition-all duration-200 flex items-center justify-center shadow-soft hover:shadow-hover";
   
   const variantClasses = {
-    primary: "bg-navy text-white hover:opacity-90 hover:shadow-md",
-    secondary: "bg-purple text-white hover:opacity-90 hover:shadow-md",
-    gold: "bg-gold text-white hover:opacity-90 hover:shadow-md",
-    outline: "border border-navy text-navy bg-transparent hover:bg-navy hover:text-white hover:shadow-sm"
+    primary: "bg-gradient-to-r from-navy to-purple text-white hover:opacity-90 hover:shadow-hover",
+    secondary: "bg-gradient-to-r from-purple to-navy text-white hover:opacity-90 hover:shadow-hover",
+    gold: "bg-gradient-to-r from-gold to-yellow-500 text-white hover:opacity-90 hover:shadow-hover",
+    outline: "border-2 border-white/30 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 hover:border-white/50 hover:shadow-soft"
   };
   
   const sizeClasses = {
-    sm: "text-sm py-2 px-4",
-    md: "text-base py-2.5 px-6",
-    lg: "text-lg py-3 px-8"
+    sm: "text-sm py-2.5 px-5",
+    md: "text-base py-3 px-7",
+    lg: "text-lg py-4 px-9"
   };
   
   const widthClass = fullWidth ? "w-full" : "";

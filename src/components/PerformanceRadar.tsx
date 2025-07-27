@@ -11,9 +11,9 @@ interface BrandHealthScorecardProps {
 
 const BrandHealthScorecard: React.FC<BrandHealthScorecardProps> = ({ scores }) => {
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600 bg-green-50 border-green-200';
-    if (score >= 60) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-    return 'text-red-600 bg-red-50 border-red-200';
+    if (score >= 80) return 'text-green-400 bg-green-500/20 border-green-500/30';
+    if (score >= 60) return 'text-yellow-400 bg-yellow-500/20 border-yellow-500/30';
+    return 'text-red-400 bg-red-500/20 border-red-500/30';
   };
 
   const getScoreLabel = (score: number) => {
@@ -21,6 +21,12 @@ const BrandHealthScorecard: React.FC<BrandHealthScorecardProps> = ({ scores }) =
     if (score >= 60) return 'Good';
     if (score >= 40) return 'Fair';
     return 'Needs Work';
+  };
+
+  const getProgressColor = (score: number) => {
+    if (score >= 80) return 'bg-green-400';
+    if (score >= 60) return 'bg-yellow-400';
+    return 'bg-red-400';
   };
 
   const categories = [
@@ -66,38 +72,36 @@ const BrandHealthScorecard: React.FC<BrandHealthScorecardProps> = ({ scores }) =
     }
   ];
 
+  const overallScore = Math.round((scores.branding + scores.ux + scores.conversion + scores.content) / 4);
+
   return (
     <div className="w-full">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {categories.map((category, index) => (
           <div
             key={index}
-            className={`p-4 rounded-lg border-2 ${getScoreColor(category.score)} transition-all duration-200 hover:shadow-md`}
+            className={`p-6 rounded-xl border ${getScoreColor(category.score)} backdrop-blur-sm transition-all duration-300 hover:shadow-hover`}
           >
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center space-x-3">
-                <div className="text-navy">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center space-x-4">
+                <div className="text-white/90">
                   {category.icon}
                 </div>
                 <div>
-                  <h4 className="font-semibold text-navy text-sm">{category.name}</h4>
-                  <p className="text-xs text-gray-600">{category.description}</p>
+                  <h4 className="font-semibold text-white text-base">{category.name}</h4>
+                  <p className="text-sm text-white/70">{category.description}</p>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold">{category.score}</div>
-                <div className="text-xs opacity-75">{getScoreLabel(category.score)}</div>
+                <div className="text-3xl font-bold text-white">{category.score}</div>
+                <div className="text-sm text-white/70">{getScoreLabel(category.score)}</div>
               </div>
             </div>
             
             {/* Progress bar */}
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-white/20 rounded-full h-3">
               <div
-                className={`h-2 rounded-full transition-all duration-500 ${
-                  category.score >= 80 ? 'bg-green-500' :
-                  category.score >= 60 ? 'bg-yellow-500' :
-                  'bg-red-500'
-                }`}
+                className={`h-3 rounded-full transition-all duration-700 ${getProgressColor(category.score)}`}
                 style={{ width: `${category.score}%` }}
               />
             </div>
@@ -106,17 +110,17 @@ const BrandHealthScorecard: React.FC<BrandHealthScorecardProps> = ({ scores }) =
       </div>
       
       {/* Overall score summary */}
-      <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+      <div className="mt-8 p-6 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
         <div className="flex items-center justify-between">
           <div>
-            <h4 className="font-semibold text-navy">Overall Brand Health</h4>
-            <p className="text-sm text-gray-600">Average score across all categories</p>
+            <h4 className="font-semibold text-white text-lg">Overall Brand Health</h4>
+            <p className="text-sm text-white/70">Average score across all categories</p>
           </div>
           <div className="text-right">
-            <div className="text-3xl font-bold text-navy">
-              {Math.round((scores.branding + scores.ux + scores.conversion + scores.content) / 4)}
+            <div className="text-4xl font-bold text-gold">
+              {overallScore}
             </div>
-            <div className="text-sm text-gray-600">out of 100</div>
+            <div className="text-sm text-white/70">out of 100</div>
           </div>
         </div>
       </div>

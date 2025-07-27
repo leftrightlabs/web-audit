@@ -81,14 +81,6 @@ export default function ReportViewerPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen flex flex-col w-full">
-      <header className="bg-navy text-white py-6 shadow-md w-full">
-        <div className="container mx-auto px-4 flex items-center justify-center">
-          <h1 className="font-heading text-2xl md:text-3xl font-bold tracking-heading text-balance">
-            Website Brand Audit Report
-          </h1>
-        </div>
-      </header>
-
       <main className="flex-grow w-full">
         <div className="w-full">
           <Report
@@ -103,9 +95,9 @@ export default function ReportViewerPage({ params }: PageProps) {
         </div>
       </main>
 
-      <footer className="bg-tan py-6 mt-auto border-t border-gold border-opacity-20 w-full">
+      <footer className="bg-navy py-6 mt-auto border-t border-gold border-opacity-20 w-full">
         <div className="container mx-auto px-4">
-          <div className="text-center text-sm text-navy text-balance">
+          <div className="text-center text-sm text-white text-balance">
             &copy; {new Date().getFullYear()} Website Brand Audit Tool
           </div>
         </div>

@@ -22,9 +22,15 @@ const ScoreCircle: React.FC<{ score: number; label: string }> = ({
   label,
 }) => {
   const getScoreColor = (value: number) => {
-    if (value >= 90) return 'text-green-500';
-    if (value >= 50) return 'text-yellow-500';
-    return 'text-red-500';
+    if (value >= 90) return 'text-green-600';
+    if (value >= 50) return 'text-yellow-600';
+    return 'text-red-600';
+  };
+
+  const getScoreBgColor = (value: number) => {
+    if (value >= 90) return 'bg-green-100';
+    if (value >= 50) return 'bg-yellow-100';
+    return 'bg-red-100';
   };
 
   const circumference = 2 * Math.PI * 45;
@@ -132,9 +138,9 @@ const ListItem: React.FC<{
   };
 
   return (
-    <li className="flex items-start">
+    <li className="flex items-start p-4 bg-white rounded-lg shadow-soft hover:shadow-hover transition-all duration-300">
       <div
-        className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center mr-4 mt-1 ${
+        className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mr-4 mt-1 ${
           colors[type]
         }`}
       >
@@ -240,260 +246,218 @@ const Report: React.FC<ReportProps> = ({
   const overallGrade = deriveGrade();
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4">
-      <div className="text-center mb-12">
-        <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4 text-navy tracking-heading text-balance">
-          Your Website Brand Audit is Ready
-        </h2>
-        <p className="text-lg text-gray-600 text-balance">
-          Here is the analysis for{' '}
-          <a
-            href={website}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-purple hover:underline"
-          >
-            {website}
-          </a>
-        </p>
+    <div className="w-full">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-br from-navy to-purple text-white py-16 px-6 mb-12 w-full">
+        <div className="text-center max-w-4xl mx-auto">
+          {/* Left Right Labs Logo */}
+          <div className="mb-8">
+            <div className="text-center">
+              <img 
+                src="/LeftRightLabs_Logo2022White.png" 
+                alt="Left Right Labs" 
+                className="h-16 md:h-20 mx-auto"
+              />
+            </div>
+          </div>
+          
+          <h1 className="font-heading text-4xl md:text-5xl font-bold mb-6 tracking-heading text-balance">
+            Your Website Brand Audit is Ready
+          </h1>
+          <p className="text-xl text-white/90 mb-8 text-balance">
+            Here is the comprehensive analysis for{' '}
+            <a
+              href={website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gold hover:underline font-medium"
+            >
+              {website}
+            </a>
+          </p>
+          
+          {/* Action buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button
+              onClick={onDownloadPdf}
+              isLoading={isGeneratingPdf}
+              variant="outline"
+              size="lg"
+              disabled={auditResult.isMockData}
+            >
+              {auditResult.isMockData ? 'Download Unavailable' : 'Download PDF Report'}
+            </Button>
+            <Button
+              onClick={handleShareLink}
+              isLoading={isGeneratingLink}
+              variant="outline"
+              size="lg"
+              disabled={auditResult.isMockData}
+            >
+              {auditResult.isMockData ? 'Share Unavailable' : (linkCopied ? 'Link Copied!' : 'Share Report')}
+            </Button>
+          </div>
+
+          {/* Explanation for disabled buttons */}
+          {auditResult.isMockData && (
+            <p className="text-sm text-white/70 mt-4">
+              Download, email, and share features are disabled when using generic content.
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Show warning if using mock data */}
       {auditResult.isMockData && onRetryAnalysis && (
-        <MockDataWarning 
-          onRetry={onRetryAnalysis}
-          isRetrying={isRetryingAnalysis}
-        />
-      )}
-
-      {/* Action buttons */}
-      <div className="flex flex-col md:flex-row gap-4 justify-center mb-12">
-        <Button
-          onClick={onDownloadPdf}
-          isLoading={isGeneratingPdf}
-          variant="primary"
-          size="lg"
-          disabled={auditResult.isMockData}
-        >
-          {auditResult.isMockData ? 'Download Unavailable' : 'Download PDF Report'}
-        </Button>
-        <Button
-          onClick={onSendEmail}
-          isLoading={isSendingEmail}
-          variant="outline"
-          size="lg"
-          disabled={auditResult.isMockData}
-        >
-          {auditResult.isMockData ? 'Email Unavailable' : 'Email Me This Report'}
-        </Button>
-
-        <Button
-          onClick={handleShareLink}
-          isLoading={isGeneratingLink}
-          variant="gold"
-          size="lg"
-          disabled={auditResult.isMockData}
-        >
-          {auditResult.isMockData ? 'Share Unavailable' : (linkCopied ? 'Link Copied!' : 'Share Report')}
-        </Button>
-      </div>
-
-      {/* Explanation for disabled buttons */}
-      {auditResult.isMockData && (
-        <div className="text-center mb-8">
-          <p className="text-sm text-gray-600">
-            Download, email, and share features are disabled when using generic content.
-          </p>
+        <div className="mb-12 max-w-6xl mx-auto px-4">
+          <MockDataWarning 
+            onRetry={onRetryAnalysis}
+            isRetrying={isRetryingAnalysis}
+          />
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow-xl p-8 md:p-12 border border-gray-100">
-        {/* Warning banner for mock data */}
-        {auditResult.isMockData && (
-          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-red-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <h4 className="text-sm font-medium text-red-800">
-                  ⚠️ Generic Content Warning
-                </h4>
-                <p className="mt-1 text-sm text-red-700">
-                  This report contains generic placeholder content because AI analysis is currently unavailable. 
-                  The information below should not be used for business decisions.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Summary Section */}
-        <div className="mb-12">
-          <h3 className="font-heading text-2xl font-bold mb-4 text-navy">
-            Audit Summary
-          </h3>
-          {!shouldShowRealData ? (
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-              <p className="text-gray-600 text-center">
-                Temporarily unavailable
-              </p>
-            </div>
-          ) : (
-            <p className="text-gray-700 leading-relaxed text-balance">
-              {summary}
-            </p>
-          )}
-        </div>
-
-                {/* Brand Health Dashboard Section */}
-        <div className="mb-12">
-          <h3 className="font-heading text-2xl font-bold mb-6 text-navy">
+      {/* Main Report Content */}
+      <div className="max-w-6xl mx-auto px-4 space-y-12">
+        {/* Brand Health Dashboard Section */}
+        <section className="bg-gradient-to-br from-navy to-purple text-white rounded-2xl p-8 md:p-12">
+          <h2 className="font-heading text-3xl font-bold mb-8 text-center">
             Brand Health Dashboard
-          </h3>
+          </h2>
 
           {/* Grade + Brand Health Scores */}
           <div className="grid md:grid-cols-3 gap-8 items-center">
             {overallGrade && (
               <div className="flex flex-col items-center md:col-span-1">
-                <span className="text-6xl font-extrabold text-navy leading-none">
-                  {overallGrade}
-                </span>
-                <span className="mt-2 text-gray-600 font-medium">
-                  Overall Grade
-                </span>
+                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 text-center">
+                  <span className="text-7xl font-extrabold text-gold leading-none">
+                    {overallGrade}
+                  </span>
+                  <p className="mt-3 text-white/90 font-medium text-lg">
+                    Overall Grade
+                  </p>
+                </div>
               </div>
             )}
 
             <div className="md:col-span-2">
               {auditResult.pillarScores ? (
-                <BrandHealthScorecard scores={auditResult.pillarScores} />
+                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8">
+                  <BrandHealthScorecard scores={auditResult.pillarScores} />
+                </div>
               ) : (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-                  <p className="text-gray-600 text-center">
+                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 text-center">
+                  <p className="text-white/80 text-lg">
                     Brand health scores temporarily unavailable
                   </p>
                 </div>
               )}
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Visual Identity Section */}
-        {(auditResult.colorPalette || auditResult.fonts) && (
-          <div className="mb-12">
-            <h3 className="font-heading text-2xl font-bold mb-6 text-navy">
+        {/* Summary Section */}
+        <section className="bg-gradient-to-br from-tan to-tan/60 text-navy rounded-2xl p-8 md:p-12">
+          <h2 className="font-heading text-3xl font-bold mb-8 text-center">
+            Audit Summary
+          </h2>
+          {!shouldShowRealData ? (
+            <div className="bg-white/40 backdrop-blur-sm rounded-xl p-8 text-center">
+              <p className="text-navy/80 text-lg">
+                Temporarily unavailable
+              </p>
+            </div>
+          ) : (
+            <div className="bg-white/40 backdrop-blur-sm rounded-xl p-8">
+              <div className="space-y-4">
+                {summary.split('. ').map((sentence, index) => (
+                  sentence.trim() && (
+                    <p key={index} className="text-navy/90 leading-relaxed text-balance text-lg">
+                      {sentence.trim()}.
+                    </p>
+                  )
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* Visual Identity Section - Hidden for now */}
+        {/* {(auditResult.colorPalette || auditResult.fonts) && (
+          <section className="bg-tan rounded-2xl p-8 md:p-12">
+            <h2 className="font-heading text-3xl font-bold mb-8 text-navy text-center">
               Visual Identity Snapshot
-            </h3>
+            </h2>
 
-            {/* Color palette */}
-            {auditResult.colorPalette && auditResult.colorPalette.length > 0 && (
-              <div className="mb-6">
-                <h4 className="font-heading text-xl font-semibold mb-3 text-navy">
-                  Primary Colors
-                </h4>
-                <div className="flex flex-wrap gap-4">
-                  {auditResult.colorPalette.map((hex, idx) => (
-                    <div key={idx} className="flex flex-col items-center">
-                      <div
-                        className="w-12 h-12 rounded-lg border"
-                        style={{ backgroundColor: hex }}
-                      />
-                      <span className="mt-1 text-sm text-gray-700">{hex}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Fonts */}
-            {auditResult.fonts && auditResult.fonts.length > 0 && (
-              <div>
-                <h4 className="font-heading text-xl font-semibold mb-3 text-navy">
-                  Primary Fonts
-                </h4>
-                <ul className="list-disc ml-6 space-y-1">
-                  {auditResult.fonts.map((font, idx) => (
-                    <li key={idx} className="text-gray-700" style={{ fontFamily: font }}>
-                      {font}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
+            <div className="bg-tan/30 rounded-xl p-6">
+              <ul className="space-y-3">
+                {auditResult.fonts.map((font, idx) => (
+                  <li key={idx} className="text-gray-700 text-lg" style={{ fontFamily: font }}>
+                    {font}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
         )}
 
-        {/* No Visual Identity Data Message */}
         {(!auditResult.colorPalette || auditResult.colorPalette.length === 0) && 
          (!auditResult.fonts || auditResult.fonts.length === 0) && (
-          <div className="mb-12">
-            <h3 className="font-heading text-2xl font-bold mb-6 text-navy">
+          <section className="bg-white rounded-2xl shadow-soft p-8 md:p-12">
+            <h2 className="font-heading text-3xl font-bold mb-8 bg-gradient-to-r from-navy to-purple bg-clip-text text-transparent">
               Visual Identity Snapshot
-            </h3>
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-              <p className="text-gray-600 text-center">
+            </h2>
+            <div className="bg-tan/50 border border-tan rounded-xl p-8 text-center">
+              <p className="text-gray-600 text-lg">
                 Visual identity analysis (colors and fonts) could not be extracted from this website. 
                 This may be due to the site&apos;s structure or styling approach.
               </p>
             </div>
-          </div>
-        )}
+          </section>
+        )} */}
 
         {/* ROI Forecast Section */}
         {lighthouseData && (
-          <div className="mb-12">
-            <h3 className="font-heading text-2xl font-bold mb-4 text-navy">
+          <section className="bg-gradient-to-br from-navy to-purple text-white rounded-2xl p-8 md:p-12">
+            <h2 className="font-heading text-3xl font-bold mb-8 text-center">
               ROI Forecast
-            </h3>
+            </h2>
             <div className="grid md:grid-cols-3 gap-6">
-              <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-lg border border-green-200">
-                <h4 className="font-heading text-lg font-semibold mb-2 text-green-800">
+              <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl text-center">
+                <h3 className="font-heading text-lg font-semibold mb-3">
                   Performance Impact
-                </h4>
-                <p className="text-green-700 text-sm">
+                </h3>
+                <p className="text-white/90">
                   Improving page speed and user experience could increase conversion rates by 15-25%.
                 </p>
               </div>
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg border border-blue-200">
-                <h4 className="font-heading text-lg font-semibold mb-2 text-blue-800">
+              <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl text-center">
+                <h3 className="font-heading text-lg font-semibold mb-3">
                   SEO Potential
-                </h4>
-                <p className="text-blue-700 text-sm">
+                </h3>
+                <p className="text-white/90">
                   Optimizing content and technical SEO could improve search rankings and organic traffic.
                 </p>
               </div>
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-lg border border-purple-200">
-                <h4 className="font-heading text-lg font-semibold mb-2 text-purple-800">
+              <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl text-center">
+                <h3 className="font-heading text-lg font-semibold mb-3">
                   Brand Growth
-                </h4>
-                <p className="text-purple-700 text-sm">
+                </h3>
+                <p className="text-white/90">
                   Enhanced branding and messaging could increase customer trust and brand recognition.
                 </p>
               </div>
             </div>
-          </div>
+          </section>
         )}
 
         {/* Technical Performance Metrics */}
         {lighthouseData && (
-          <div className="mb-12">
-            <h3 className="font-heading text-2xl font-bold mb-6 text-navy">
+          <section className="bg-tan rounded-2xl p-8 md:p-12">
+            <h2 className="font-heading text-3xl font-bold mb-8 text-navy text-center">
               Technical Performance Metrics
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               <ScoreCircle
                 score={lighthouseData.performance}
                 label="Performance"
@@ -508,122 +472,195 @@ const Report: React.FC<ReportProps> = ({
               />
               <ScoreCircle score={lighthouseData.seo} label="SEO" />
             </div>
-          </div>
+          </section>
         )}
 
         {/* Strengths and Weaknesses Grid */}
-        <div className="grid md:grid-cols-2 gap-12">
+        <div className="grid md:grid-cols-2 gap-8">
           {/* Strengths Section */}
-          <div>
-            <h3 className="font-heading text-2xl font-bold mb-4 text-navy">
+          <section className="bg-gradient-to-br from-navy to-navy/80 text-white rounded-2xl p-8 md:p-12">
+            <h2 className="font-heading text-3xl font-bold mb-6">
               What You&apos;re Doing Well
-            </h3>
+            </h2>
             {!shouldShowRealData ? (
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-                <p className="text-gray-600 text-center">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center">
+                <p className="text-white/80">
                   Temporarily unavailable
                 </p>
               </div>
             ) : (
-              <ul className="space-y-4">
+              <div className="space-y-4">
                 {strengths.map((item, index) => (
-                  <ListItem key={index} text={item} type="strength" />
+                  <div key={index} className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/20 flex items-center justify-center mr-3 mt-1">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4 text-white"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </div>
+                      <p className="text-white/90 leading-relaxed text-balance">{item}</p>
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
             )}
-          </div>
+          </section>
 
           {/* Weaknesses Section */}
-          <div>
-            <h3 className="font-heading text-2xl font-bold mb-4 text-navy">
+          <section className="bg-gradient-to-br from-purple to-purple/80 text-white rounded-2xl p-8 md:p-12">
+            <h2 className="font-heading text-3xl font-bold mb-6">
               Areas for Improvement
-            </h3>
+            </h2>
             {!shouldShowRealData ? (
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-                <p className="text-gray-600 text-center">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center">
+                <p className="text-white/80">
                   Temporarily unavailable
                 </p>
               </div>
             ) : (
-              <ul className="space-y-4">
+              <div className="space-y-4">
                 {weaknesses.map((item, index) => (
-                  <ListItem key={index} text={item} type="weakness" />
+                  <div key={index} className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/20 flex items-center justify-center mr-3 mt-1">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4 text-white"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </div>
+                      <p className="text-white/90 leading-relaxed text-balance">{item}</p>
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
             )}
-          </div>
+          </section>
         </div>
 
         {/* Actionable Steps Section */}
-        <div className="mt-12">
-          <h3 className="font-heading text-2xl font-bold mb-4 text-navy">
+        <section className="bg-gradient-to-br from-navy to-purple text-white rounded-2xl p-8 md:p-12">
+          <h2 className="font-heading text-3xl font-bold mb-8 text-center">
             Top 3 Recommended Next Steps
-          </h3>
+          </h2>
           {!shouldShowRealData ? (
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-              <p className="text-gray-600 text-center">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 text-center">
+              <p className="text-white/80 text-lg">
                 Temporarily unavailable
               </p>
             </div>
           ) : (
-            <ol className="space-y-6">
+            <div className="space-y-6">
               {actionableSteps.map((item, index) => (
-                <li key={index} className="flex items-start">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center font-bold mr-4 mt-1">
-                    {index + 1}
+                <div key={index} className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-white/20 flex items-center justify-center font-bold mr-4 mt-1 text-white">
+                      {index + 1}
+                    </div>
+                    <p className="text-white/90 leading-relaxed text-balance text-lg">
+                      {item}
+                    </p>
                   </div>
-                  <p className="text-gray-700 leading-relaxed text-balance">
-                    {item}
-                  </p>
-                </li>
+                </div>
               ))}
-            </ol>
+            </div>
           )}
-        </div>
+        </section>
 
         {/* Additional Improvements Section */}
         {improvements && improvements.length > 0 && (
-          <div className="mt-12">
-            <h3 className="font-heading text-2xl font-bold mb-4 text-navy">
+          <section className="bg-gradient-to-br from-tan to-tan/60 text-navy rounded-2xl p-8 md:p-12">
+            <h2 className="font-heading text-3xl font-bold mb-8 text-center">
               Additional Suggestions
-            </h3>
+            </h2>
             {!shouldShowRealData ? (
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-                <p className="text-gray-600 text-center">
-                Temporarily unavailable
-              </p>
-            </div>
+              <div className="bg-white/40 backdrop-blur-sm rounded-xl p-8 text-center">
+                <p className="text-navy/80 text-lg">
+                  Temporarily unavailable
+                </p>
+              </div>
             ) : (
-              <ul className="space-y-4">
+              <div className="space-y-4">
                 {improvements.map((item, index) => (
-                  <ListItem key={index} text={item} type="improvement" />
+                  <div key={index} className="bg-white/40 backdrop-blur-sm rounded-xl p-6 border border-navy/20">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gold flex items-center justify-center mr-4 mt-1">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 text-white"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                          />
+                        </svg>
+                      </div>
+                      <p className="text-navy/90 leading-relaxed text-balance">{item}</p>
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
             )}
-          </div>
+          </section>
         )}
       </div>
 
-      {/* Rescan Section - Separate from main report */}
-      <div className="mt-12 bg-gray-50 rounded-lg p-8 border border-gray-200">
-        <div className="text-center">
-          <h3 className="font-heading text-xl font-semibold mb-4 text-navy">
-            Need a Fresh Analysis?
-          </h3>
-          <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-            Re-run the website analysis with the same settings to get updated insights. 
-            This is useful if you&apos;ve made changes to your website or want to track improvements over time.
+      {/* Spacing between sections */}
+      <div className="h-16"></div>
+
+      {/* Strategy Session CTA */}
+      <section className="bg-gradient-to-br from-navy to-purple text-white p-8 md:p-12">
+        <div className="text-center max-w-3xl mx-auto">
+          <h2 className="font-heading text-3xl font-bold mb-6">
+            Ready to Elevate Your Brand?
+          </h2>
+          <p className="text-xl text-white/90 mb-8 text-balance">
+            This audit is just the beginning. Book a strategy session with our team to dive deeper into your brand positioning, 
+            create a comprehensive action plan, and transform your website into a powerful conversion machine.
           </p>
-          <Button
-            onClick={onRetryAnalysis}
-            isLoading={isRetryingAnalysis}
-            variant="outline"
-            size="lg"
-          >
-            {isRetryingAnalysis ? 'Rescanning...' : '🔄 Rescan Website'}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button
+              onClick={() => window.open('https://leftrightlabs.com/contact', '_blank')}
+              variant="outline"
+              size="lg"
+            >
+              Book Strategy Session
+            </Button>
+            <Button
+              onClick={() => window.open('https://leftrightlabs.com', '_blank')}
+              variant="outline"
+              size="lg"
+            >
+              Learn More About Us
+            </Button>
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 };

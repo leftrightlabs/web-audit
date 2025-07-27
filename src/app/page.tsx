@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Toast from '@/components/Toast';
 import { FormData, AuditResult, LighthouseData } from '@/types';
 import ProgressBar from '@/components/ProgressBar';
@@ -8,9 +9,9 @@ import Landing from '@/components/Landing';
 import LeadForm from '@/components/LeadForm';
 import PreferencesForm from '@/components/PreferencesForm';
 import Analysis from '@/components/Analysis';
-import Report from '@/components/Report';
 
 export default function Home() {
+  const router = useRouter();
   // State for multi-step form
   const [step, setStep] = useState(0); // 0: Landing, 1: Lead Form, 2: Preferences Form (with Website URL), 3: Analysis, 4: Report
   const [formData, setFormData] = useState<FormData>({
@@ -28,6 +29,39 @@ export default function Home() {
   const [emailLoading, setEmailLoading] = useState(false);
   const [error, setError] = useState('');
   const [toast, setToast] = useState<{ message: string; onRetry?: () => void } | null>(null);
+
+  // Redirect to report route when step 4 is reached
+  useEffect(() => {
+    if (step === 4 && auditResult) {
+      // Generate a share link and redirect to the report route
+      const generateAndRedirect = async () => {
+        try {
+          const response = await fetch('/api/magic-link', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ auditResult, lighthouseData, website: formData.website }),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            // Extract the token from the URL and redirect to the report route
+            const url = new URL(result.url);
+            const token = url.pathname.split('/').pop();
+            router.push(`/report/${token}`);
+          } else {
+            throw new Error(result.message || 'Failed to generate report link');
+          }
+        } catch (error) {
+          console.error('Error generating report link:', error);
+          setError('Failed to generate report link. Please try again.');
+          setStep(3); // Go back to analysis step
+        }
+      };
+
+      generateAndRedirect();
+    }
+  }, [step, auditResult, lighthouseData, formData.website, router]);
 
   // Handle start button click
   const handleStart = () => {
@@ -376,24 +410,8 @@ export default function Home() {
           </div>
         );
       case 4:
-        return (
-          <div className="py-8 md:py-12 w-full">
-            <ProgressBar currentStep={4} totalSteps={4} />
-            {auditResult && (
-              <Report 
-                auditResult={auditResult}
-                lighthouseData={lighthouseData}
-                website={formData.website}
-                onDownloadPdf={handleDownloadPdf}
-                onSendEmail={handleSendEmail}
-                isGeneratingPdf={pdfLoading}
-                isSendingEmail={emailLoading}
-                onRetryAnalysis={handleRetryAnalysis}
-                isRetryingAnalysis={loading}
-              />
-            )}
-          </div>
-        );
+        // Redirect to report route - this will be handled by useEffect
+        return null;
       default:
         return <Landing onStart={handleStart} />;
     }
