@@ -120,10 +120,18 @@ export default function Home() {
       }
 
       // Call API to analyze website with all form data
+      // Map preference fields to the names expected by the OpenAI endpoint
+      const openAiPayload = {
+        website: updatedFormData.website,
+        businessGoal: updatedFormData.websiteGoal, // formerly websiteGoal
+        industry: updatedFormData.industryType,    // formerly industryType
+        runningAds: updatedFormData.marketingCampaigns, // formerly marketingCampaigns
+      };
+
       const response = await fetch('/api/openai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedFormData),
+        body: JSON.stringify(openAiPayload),
       });
 
       const result = await response.json();
