@@ -343,12 +343,15 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
       {/* Progress bar */}
       <div className="w-full bg-gray-200 rounded-full h-2 mb-8">
         <div 
-          className="bg-gold h-2 rounded-full transition-all duration-500"
+          className="bg-purple h-2 rounded-full transition-all duration-500"
           style={{ width: `${progress}%` }}
         ></div>
       </div>
 
-      <div className="bg-gradient-to-b from-white to-gray-50 rounded-xl shadow-xl p-8 md:p-10 border border-gray-100">
+      <div className="bg-gradient-to-b from-white to-gray-50 rounded-xl shadow-xl p-8 md:p-10" style={{
+        background: 'linear-gradient(to bottom, white, #f9fafb) padding-box, linear-gradient(to right, #21145f, #923a80) border-box',
+        border: '5px solid transparent'
+      }}>
         {/* Render questions only; final review screen removed */}
         {currentQuestionIndex < questions.length ? (
           <form 

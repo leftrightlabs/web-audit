@@ -27,7 +27,7 @@ const Button: React.FC<ButtonProps> = ({
     primary: "bg-gradient-to-r from-navy to-purple text-white hover:opacity-90 hover:shadow-hover",
     secondary: "bg-gradient-to-r from-purple to-navy text-white hover:opacity-90 hover:shadow-hover",
     gold: "bg-gradient-to-r from-gold to-yellow-500 text-white hover:opacity-90 hover:shadow-hover",
-    outline: "border-2 border-white/30 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 hover:border-white/50 hover:shadow-soft"
+    outline: "border-2 border-gray-300 text-gray-600 bg-white hover:bg-gray-50 hover:border-gray-400 hover:shadow-soft"
   };
   
   const sizeClasses = {

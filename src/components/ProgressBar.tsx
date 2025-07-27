@@ -17,7 +17,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, totalSteps }) =>
       <div className="relative">
         <div className="h-1 w-full bg-gray-200 rounded-full absolute top-5">
           <div
-            className="h-1 bg-gold rounded-full transition-all duration-300 ease-in-out"
+            className="h-1 bg-navy rounded-full transition-all duration-300 ease-in-out"
             style={{ width: `${progress}%` }}
           ></div>
         </div>

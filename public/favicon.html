@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Favicon Generator</title>
+    <style>
+        body { margin: 0; padding: 20px; background: #f0f0f0; }
+        .favicon-container { 
+            width: 32px; 
+            height: 32px; 
+            margin: 20px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <h2>Website Brand Audit Tool Favicon</h2>
+    <p>This SVG can be converted to PNG using browser dev tools or online converters:</p>
+    
+    <div class="favicon-container">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Background circle with gradient -->
+            <defs>
+                <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#21145f;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#923a80;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            
+            <!-- Main background circle -->
+            <circle cx="16" cy="16" r="15" fill="url(#bgGradient)" stroke="#b0943d" stroke-width="1"/>
+            
+            <!-- Magnifying glass (audit/search concept) -->
+            <circle cx="12" cy="12" r="6" fill="none" stroke="#eae1cd" stroke-width="2"/>
+            <line x1="17" y1="17" x2="22" y2="22" stroke="#eae1cd" stroke-width="2" stroke-linecap="round"/>
+            
+            <!-- Checkmark inside magnifying glass (audit completion) -->
+            <path d="M9 12 L11 14 L15 10" stroke="#b0943d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            
+            <!-- Small accent dots -->
+            <circle cx="24" cy="8" r="1.5" fill="#b0943d"/>
+            <circle cx="26" cy="10" r="1" fill="#eae1cd"/>
+        </svg>
+    </div>
+    
+    <p><strong>Design Elements:</strong></p>
+    <ul>
+        <li><strong>Background:</strong> Navy to Purple gradient (#21145f to #923a80)</li>
+        <li><strong>Border:</strong> Gold accent (#b0943d)</li>
+        <li><strong>Magnifying Glass:</strong> Tan color (#eae1cd) representing audit/search</li>
+        <li><strong>Checkmark:</strong> Gold color (#b0943d) representing completion</li>
+        <li><strong>Accent Dots:</strong> Gold and tan for visual interest</li>
+    </ul>
+    
+    <p><strong>To convert to PNG:</strong></p>
+    <ol>
+        <li>Right-click the SVG above</li>
+        <li>Save as PNG</li>
+        <li>Resize to 32x32 pixels</li>
+        <li>Save as favicon.png in the public folder</li>
+    </ol>
+</body>
+</html> 

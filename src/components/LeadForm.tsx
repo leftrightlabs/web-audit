@@ -27,7 +27,10 @@ const LeadForm: React.FC<LeadFormProps> = ({ onSubmit, isLoading, defaultValues 
         <p className="text-lg text-gray-600 text-balance">Please provide your information to continue your free brand audit</p>
       </div>
       
-      <div className="bg-white rounded-lg shadow-md p-8 md:p-10 border border-gray-100">
+      <div className="bg-white rounded-lg shadow-md p-8 md:p-10" style={{
+        background: 'linear-gradient(white, white) padding-box, linear-gradient(to right, #21145f, #923a80) border-box',
+        border: '5px solid transparent'
+      }}>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-navy mb-2">

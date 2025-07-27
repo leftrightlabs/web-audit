@@ -12,6 +12,11 @@ const workSans = Work_Sans({
 export const metadata: Metadata = {
   title: "Free Website Brand Audit | Improve Your Online Presence",
   description: "Get a free AI-powered brand audit of your website. Receive actionable insights to improve your online presence, branding, and messaging.",
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
