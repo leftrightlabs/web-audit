@@ -70,27 +70,30 @@ export const analyzeWebsite = async (
     
     // Create a structured prompt for OpenAI
     const prompt = `
-      You are a professional website branding consultant conducting a brand audit. Analyze this website content and provide detailed, actionable feedback:
+      You are a senior branding strategist who specializes in high-impact online presence for businesses in the ${industry || 'given'} industry. Your task is to carry out a thorough yet easy-to-understand website brand audit. Examine the website content below in the context of best-in-class practices for this industry and the stated business goal. Speak directly to a busy founder or marketing lead – be clear, constructive, and avoid generic fluff.
 
       Website URL: ${url}
       ${businessGoal ? `Primary Business Goal: ${businessGoal}` : ''}
       ${industry ? `Industry: ${industry}` : ''}
       ${runningAds ? `Currently Running Paid Ads: ${runningAds}` : ''}
-      
-      Website Content Extract:
-      ---
+
+      -------------
+      WEBSITE CONTENT EXTRACT
+      -------------
       ${extractedText}
-      ---
+      -------------
 
-      Provide a comprehensive brand audit with the following:
-      
-      1. A concise summary paragraph of the overall branding effectiveness.
-      2. 3-5 specific brand and design strengths.
-      3. 3-5 key areas for improvement related to brand consistency, messaging clarity, design, user experience, and content.
-      4. At least 3 detailed, actionable next steps the business should take to improve their branding.
-      5. 2-3 tailored improvements specific to their ${industry || 'industry'} and ${businessGoal ? businessGoal.toLowerCase() : 'business'} goals.
+      After carefully reviewing the site, return a JSON object with the following keys exactly: summary, strengths, weaknesses, actionableSteps, improvements.
 
-      Format your response as structured JSON with these keys: summary, strengths (array), weaknesses (array), actionableSteps (array), and improvements (array).
+      Requirements for each key:
+
+      1. summary – 1–2 short paragraphs that evaluate the overall brand experience, written in second person and referencing their industry to make it feel personalized (e.g. “As a B2B SaaS company…”).
+      2. strengths – an array with 3-5 bullet points describing concrete brand/design/UX strengths. Each bullet should be 1 concise sentence.
+      3. weaknesses – an array with 3-5 bullet points highlighting the most critical gaps or inconsistencies. Be specific and root the feedback in industry expectations.
+      4. actionableSteps – an array containing ONLY the Top 3 most important next steps, prioritized by impact. Each step should start with an imperative verb, include a short rationale, and, where helpful, an example.
+      5. improvements – an array with 2-3 additional tailored suggestions that link directly to their ${industry || 'industry'} context and their ${businessGoal ? businessGoal.toLowerCase() : 'business'} goals.
+
+      Reply ONLY with valid JSON that matches the schema described above. Do not wrap your answer in markdown or add any extraneous text.
     `;
 
     const response = await client.chat.completions.create({

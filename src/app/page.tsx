@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Toast from '@/components/Toast';
 import { FormData, AuditResult } from '@/types';
 import ProgressBar from '@/components/ProgressBar';
 import Landing from '@/components/Landing';
@@ -23,6 +24,7 @@ export default function Home() {
   const [pdfLoading, setPdfLoading] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
   const [error, setError] = useState('');
+  const [toast, setToast] = useState<{ message: string; onRetry?: () => void } | null>(null);
 
   // Handle start button click
   const handleStart = () => {
@@ -151,8 +153,15 @@ export default function Home() {
       }, 1000);
     } catch (error: unknown) {
       clearInterval(progressInterval);
-      setError(error instanceof Error ? error.message : 'An unexpected error occurred');
-      // Stay on analysis step but show error
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      setError(errorMessage);
+
+      // Show toast with retry option specifically for analysis failures
+      setToast({
+        message: 'We couldn\'t reach our analysis service. Please try again.',
+        onRetry: () => handlePreferencesSubmit(data),
+      });
+       
     } finally {
       setLoading(false);
     }
@@ -325,6 +334,15 @@ export default function Home() {
           </div>
         )}
         
+        {toast && (
+          <Toast
+            message={toast.message}
+            actionLabel={toast.onRetry ? 'Retry' : undefined}
+            onAction={toast.onRetry}
+            onClose={() => setToast(null)}
+          />
+        )}
+
         {renderStep()}
       </main>
       

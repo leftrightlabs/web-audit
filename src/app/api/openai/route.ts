@@ -48,16 +48,20 @@ export async function POST(req: NextRequest) {
 
     let auditResult: AuditResult;
 
-    // Check if OpenAI API key is available or if we're in mock mode
-    if (!process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true') {
-      // Use mock data instead of making a real API call
-      console.log('Using mock data for website analysis');
-      
-      // Simulate API delay
+    // Decide whether to use mock data or real OpenAI analysis
+    if (process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true') {
+      console.log('Using mock data for website analysis (mock flag enabled)');
+
+      // Simulate API delay for a more realistic UI experience
       await new Promise((resolve) => setTimeout(resolve, 3000));
-      
+
       auditResult = mockAuditResult;
     } else {
+      // Ensure the OpenAI API key is configured
+      if (!process.env.OPENAI_API_KEY) {
+        throw new Error('OpenAI API key is not configured on the server');
+      }
+
       // Use real OpenAI API
       auditResult = await analyzeWebsite(
         website,
