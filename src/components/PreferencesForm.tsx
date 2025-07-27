@@ -28,7 +28,7 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
   const questions: Question[] = [
     {
       id: 'websiteGoal',
-      label: "What&apos;s your primary goal for your website?",
+      label: "What's your primary goal for your website?",
       options: [
         'Generate leads',
         'Sell products',
@@ -61,7 +61,7 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
     },
     {
       id: 'brandPersonality',
-      label: "How would you describe your brand&apos;s personality?",
+      label: "How would you describe your brand\'s personality?",
       options: [
         'Professional & Polished',
         'Bold & Energetic',
@@ -225,18 +225,25 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
               Back
             </Button>
             <Button 
-              type="submit" 
+              type="button" 
               variant="primary" 
               size="lg" 
               fullWidth 
               isLoading={isLoading}
               onClick={() => {
-                // Manually trigger form submission
-                console.log("Manually triggering form submission");
-                handleSubmit(onFormSubmit)();
+                // Simple version - just call the parent component's onSubmit directly
+                const formValues = {
+                  website: watch('website'),
+                  websiteGoal: watch('websiteGoal'),
+                  industryType: watch('industryType'),
+                  targetAudience: watch('targetAudience'),
+                  brandPersonality: watch('brandPersonality'),
+                  marketingCampaigns: watch('marketingCampaigns'),
+                  improvementArea: watch('improvementArea'),
+                };
+                // Call parent's onSubmit directly with form values
+                onSubmit(formValues);
               }}
-              // This button should ALWAYS be enabled on the review screen
-              // The website field is already validated before getting here
             >
               Review & Submit
             </Button>
@@ -263,10 +270,10 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
               {question.options.map((option) => (
                 <label 
                   key={option} 
-                  className={`flex items-center p-4 border rounded-lg cursor-pointer transition-all 
+                  className={`group flex items-center p-4 border rounded-lg cursor-pointer transition-all 
                     ${field.value === option 
-                      ? 'border-navy bg-navy bg-opacity-5' 
-                      : 'border-gray-200 hover:border-gray-300'}`}
+                      ? 'border-navy bg-navy text-white' 
+                      : 'border-gray-200 hover:border-[#923a80] hover:bg-[#923a80] hover:text-white'}`}
                   onClick={() => handleRadioChange(question.id, option)}
                 >
                   <input
@@ -274,9 +281,9 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
                     value={option}
                     checked={field.value === option}
                     onChange={() => handleRadioChange(question.id, option)}
-                    className="h-5 w-5 text-navy focus:ring-navy border-gray-300"
+                    className="h-5 w-5 text-navy focus:ring-navy border-gray-300 sr-only"
                   />
-                  <span className="ml-3 text-gray-700">{option}</span>
+                  <span className={`${field.value === option ? 'text-white' : 'text-gray-700'} group-hover:text-white`}>{option}</span>
                 </label>
               ))}
             </div>
@@ -326,17 +333,31 @@ const PreferencesForm: React.FC<PreferencesFormProps> = ({
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-8 md:p-10 border border-gray-100">
-        <form 
-          onSubmit={handleSubmit(onFormSubmit)} 
-          className="space-y-6"
-          id="preferences-form"
-        >
-          {renderCurrentQuestion()}
-          
-          <p className="text-center text-xs text-gray-500 mt-6 text-balance">
-            Website URL is required. All other questions are optional.
-          </p>
-        </form>
+        {/* Only use the form element for questions, not for the final review screen */}
+        {currentQuestionIndex < questions.length ? (
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit(onFormSubmit)(e);
+            }}
+            className="space-y-6"
+            id="preferences-form"
+          >
+            {renderCurrentQuestion()}
+            
+            <p className="text-center text-xs text-gray-500 mt-6 text-balance">
+              Website URL is required. All other questions are optional.
+            </p>
+          </form>
+        ) : (
+          <div className="space-y-6" id="preferences-review">
+            {renderCurrentQuestion()}
+            
+            <p className="text-center text-xs text-gray-500 mt-6 text-balance">
+              Website URL is required. All other questions are optional.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
