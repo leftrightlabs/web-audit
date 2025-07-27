@@ -1,4 +1,4 @@
-import { AuditResult, LighthouseData } from '@/types';
+import { LighthouseData } from '@/types';
 
 export const getLighthouseMetrics = async (
   url: string

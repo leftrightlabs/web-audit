@@ -388,7 +388,7 @@ const Report: React.FC<ReportProps> = ({
           {/* Strengths Section */}
           <div>
             <h3 className="font-heading text-2xl font-bold mb-4 text-navy">
-              What You're Doing Well
+              What You&apos;re Doing Well
             </h3>
             <ul className="space-y-4">
               {strengths.map((item, index) => (

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { analyzeWebsite } from '@/lib/openai';
 import { getLighthouseMetrics } from '@/lib/pagespeed';
-import { AuditResult, LighthouseData } from '@/types';
+import { AuditResult } from '@/types';
 
 // Mock data for testing without an API key
 const mockAuditResult: AuditResult = {
