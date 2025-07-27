@@ -159,6 +159,28 @@ const Report: React.FC<ReportProps> = ({
   const { summary, strengths, weaknesses, actionableSteps, improvements } =
     auditResult;
 
+  // Debug logging
+  console.log('Report component - isMockData:', auditResult.isMockData);
+  console.log('Report component - summary length:', summary?.length || 0);
+  console.log('Report component - strengths count:', strengths?.length || 0);
+  console.log('Report component - weaknesses count:', weaknesses?.length || 0);
+  console.log('Report component - actionableSteps count:', actionableSteps?.length || 0);
+
+  // Helper function to check if we have real AI data
+  const hasRealData = (data: any[] | string | undefined): boolean => {
+    if (!data) return false;
+    if (Array.isArray(data)) return data.length > 0;
+    if (typeof data === 'string') return data.trim().length > 0;
+    return false;
+  };
+
+  // Check if we should show real data or "temporarily unavailable"
+  const shouldShowRealData = !auditResult.isMockData && 
+    hasRealData(summary) && 
+    hasRealData(strengths) && 
+    hasRealData(weaknesses) && 
+    hasRealData(actionableSteps);
+
   // State for Share Link generation
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
@@ -323,9 +345,17 @@ const Report: React.FC<ReportProps> = ({
           <h3 className="font-heading text-2xl font-bold mb-4 text-navy">
             Audit Summary
           </h3>
-          <p className="text-gray-700 leading-relaxed text-balance">
-            {summary}
-          </p>
+          {!shouldShowRealData ? (
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+              <p className="text-gray-600 text-center">
+                Temporarily unavailable
+              </p>
+            </div>
+          ) : (
+            <p className="text-gray-700 leading-relaxed text-balance">
+              {summary}
+            </p>
+          )}
         </div>
 
         {/* Brand Dashboard Section */}
@@ -482,11 +512,19 @@ const Report: React.FC<ReportProps> = ({
             <h3 className="font-heading text-2xl font-bold mb-4 text-navy">
               What You&apos;re Doing Well
             </h3>
-            <ul className="space-y-4">
-              {strengths.map((item, index) => (
-                <ListItem key={index} text={item} type="strength" />
-              ))}
-            </ul>
+            {!shouldShowRealData ? (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                <p className="text-gray-600 text-center">
+                  Temporarily unavailable
+                </p>
+              </div>
+            ) : (
+              <ul className="space-y-4">
+                {strengths.map((item, index) => (
+                  <ListItem key={index} text={item} type="strength" />
+                ))}
+              </ul>
+            )}
           </div>
 
           {/* Weaknesses Section */}
@@ -494,11 +532,19 @@ const Report: React.FC<ReportProps> = ({
             <h3 className="font-heading text-2xl font-bold mb-4 text-navy">
               Areas for Improvement
             </h3>
-            <ul className="space-y-4">
-              {weaknesses.map((item, index) => (
-                <ListItem key={index} text={item} type="weakness" />
-              ))}
-            </ul>
+            {!shouldShowRealData ? (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                <p className="text-gray-600 text-center">
+                  Temporarily unavailable
+                </p>
+              </div>
+            ) : (
+              <ul className="space-y-4">
+                {weaknesses.map((item, index) => (
+                  <ListItem key={index} text={item} type="weakness" />
+                ))}
+              </ul>
+            )}
           </div>
         </div>
 
@@ -507,18 +553,26 @@ const Report: React.FC<ReportProps> = ({
           <h3 className="font-heading text-2xl font-bold mb-4 text-navy">
             Top 3 Recommended Next Steps
           </h3>
-          <ol className="space-y-6">
-            {actionableSteps.map((item, index) => (
-              <li key={index} className="flex items-start">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center font-bold mr-4 mt-1">
-                  {index + 1}
-                </div>
-                <p className="text-gray-700 leading-relaxed text-balance">
-                  {item}
-                </p>
-              </li>
-            ))}
-          </ol>
+          {!shouldShowRealData ? (
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+              <p className="text-gray-600 text-center">
+                Temporarily unavailable
+              </p>
+            </div>
+          ) : (
+            <ol className="space-y-6">
+              {actionableSteps.map((item, index) => (
+                <li key={index} className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center font-bold mr-4 mt-1">
+                    {index + 1}
+                  </div>
+                  <p className="text-gray-700 leading-relaxed text-balance">
+                    {item}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          )}
         </div>
 
         {/* Additional Improvements Section */}
@@ -527,11 +581,19 @@ const Report: React.FC<ReportProps> = ({
             <h3 className="font-heading text-2xl font-bold mb-4 text-navy">
               Additional Suggestions
             </h3>
-            <ul className="space-y-4">
-              {improvements.map((item, index) => (
-                <ListItem key={index} text={item} type="improvement" />
-              ))}
-            </ul>
+            {!shouldShowRealData ? (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                <p className="text-gray-600 text-center">
+                Temporarily unavailable
+              </p>
+            </div>
+            ) : (
+              <ul className="space-y-4">
+                {improvements.map((item, index) => (
+                  <ListItem key={index} text={item} type="improvement" />
+                ))}
+              </ul>
+            )}
           </div>
         )}
       </div>

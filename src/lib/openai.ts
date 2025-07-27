@@ -38,18 +38,78 @@ const fetchWebsiteContent = async (url: string): Promise<string> => {
 
 // Extract key text content from HTML
 const extractTextFromHtml = (html: string): string => {
-  // Enhanced extraction to include CSS and styling information
-  let text = html;
+  // Enhanced extraction to include structured content for better personalization
+  let structuredContent = '';
+  
+  // Extract headings (H1, H2, H3, etc.) - these are often key brand messages
+  const headingMatches = html.match(/<h[1-6][^>]*>([^<]+)<\/h[1-6]>/gi);
+  if (headingMatches) {
+    structuredContent += '\n\nHEADINGS FOUND:\n';
+    headingMatches.forEach((heading, index) => {
+      const cleanHeading = heading.replace(/<[^>]*>/g, '').trim();
+      if (cleanHeading) {
+        structuredContent += `H${index + 1}: "${cleanHeading}"\n`;
+      }
+    });
+  }
+  
+  // Extract images and their alt text
+  const imageMatches = html.match(/<img[^>]*alt=["']([^"']*)["'][^>]*>/gi);
+  if (imageMatches) {
+    structuredContent += '\n\nIMAGES WITH ALT TEXT:\n';
+    imageMatches.forEach((img, index) => {
+      const altMatch = img.match(/alt=["']([^"']*)["']/i);
+      if (altMatch && altMatch[1]) {
+        structuredContent += `Image ${index + 1}: "${altMatch[1]}"\n`;
+      }
+    });
+  }
+  
+  // Extract navigation links
+  const navMatches = html.match(/<nav[^>]*>([\s\S]*?)<\/nav>/gi);
+  if (navMatches) {
+    structuredContent += '\n\nNAVIGATION MENU:\n';
+    navMatches.forEach((nav, index) => {
+      const linkMatches = nav.match(/<a[^>]*>([^<]+)<\/a>/gi);
+      if (linkMatches) {
+        structuredContent += `Nav ${index + 1}: ${linkMatches.map(link => link.replace(/<[^>]*>/g, '').trim()).join(' | ')}\n`;
+      }
+    });
+  }
+  
+  // Extract buttons and CTAs
+  const buttonMatches = html.match(/<button[^>]*>([^<]+)<\/button>/gi);
+  const ctaMatches = html.match(/<a[^>]*class[^>]*button[^>]*>([^<]+)<\/a>/gi);
+  if (buttonMatches || ctaMatches) {
+    structuredContent += '\n\nCALL-TO-ACTIONS:\n';
+    [...(buttonMatches || []), ...(ctaMatches || [])].forEach((cta, index) => {
+      const cleanCta = cta.replace(/<[^>]*>/g, '').trim();
+      if (cleanCta) {
+        structuredContent += `CTA ${index + 1}: "${cleanCta}"\n`;
+      }
+    });
+  }
+  
+  // Extract meta title and description
+  const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+  const descMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["'][^>]*>/i);
+  if (titleMatch || descMatch) {
+    structuredContent += '\n\nMETA INFORMATION:\n';
+    if (titleMatch) {
+      structuredContent += `Page Title: "${titleMatch[1]}"\n`;
+    }
+    if (descMatch) {
+      structuredContent += `Meta Description: "${descMatch[1]}"\n`;
+    }
+  }
   
   // Extract CSS styles for color and font analysis
   const styleMatches = html.match(/<style[^>]*>([\s\S]*?)<\/style>/gi);
   const linkMatches = html.match(/<link[^>]*rel=["']stylesheet["'][^>]*>/gi);
-  
-  // Extract inline styles
   const inlineStyleMatches = html.match(/style=["']([^"']*)["']/gi);
   
   // Remove scripts and HTML tags but keep some structural info
-  text = html
+  let text = html
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, ' ')
     .replace(/<[^>]*>/g, ' ')
     .replace(/\s{2,}/g, ' ')
@@ -67,8 +127,8 @@ const extractTextFromHtml = (html: string): string => {
     cssInfo += '\n\nINLINE STYLES:\n' + inlineStyleMatches.join('\n');
   }
   
-  // Combine text with CSS info
-  text = text + cssInfo;
+  // Combine all content
+  text = structuredContent + '\n\nMAIN CONTENT:\n' + text + cssInfo;
   
   // Truncate if too long (GPT has token limits)
   const maxLength = 12000;
@@ -90,7 +150,15 @@ export const buildPrompt = (
   extractedText?: string
 ): string => {
   return `
-    You are a seasoned brand strategist and UX expert. Your task is to perform a full brand audit based on the provided website content and details. Assume the site is live and customer-facing.
+    You are a seasoned brand strategist and UX expert. Your task is to perform a highly personalized brand audit based on the specific content and elements found on this website. Your analysis should reference actual text, images, and specific elements from the site to make it feel truly customized.
+
+    CRITICAL PERSONALIZATION REQUIREMENTS:
+    • Reference specific headlines, taglines, or key phrases from the website
+    • Mention actual product names, service offerings, or unique selling points found on the site
+    • Reference specific images, graphics, or visual elements you can identify
+    • Quote or paraphrase actual content from the website when making points
+    • Use the business's actual name, industry terminology, and specific language they use
+    • Reference specific pages, sections, or features you can identify from the content
 
     First, carefully evaluate the website in these four key areas:
     1. Branding and Positioning (clarity, consistency, voice)
@@ -101,22 +169,25 @@ export const buildPrompt = (
     After your evaluation, generate a response in the following JSON format:
 
     {
-      "summary": "A personalized brand audit summary, written in a helpful and professional tone, integrating your findings from the four key areas.",
+      "summary": "A highly personalized brand audit summary that references specific content from the website. Include actual headlines, product names, or key phrases you found. Write in a helpful and professional tone, integrating your findings from the four key areas while making it clear this analysis is specifically about this website's content.",
       "strengths": [
-        "A bulleted list of 3-5 key strengths of the website, based on your analysis.",
-        "Each point should be a concise sentence."
+        "3-5 key strengths that reference specific elements from the website. For example: 'Your headline \"[actual headline]\" effectively communicates your value proposition' or 'The [specific feature/product] section demonstrates strong brand positioning'",
+        "Each point should reference actual content, images, or elements from the site",
+        "Be specific about what you found and why it works well"
       ],
       "weaknesses": [
-        "A bulleted list of 3-5 critical weaknesses or areas for improvement.",
-        "Be specific and constructive in your feedback."
+        "3-5 critical weaknesses that reference specific content or missing elements. For example: 'The [specific section] could be improved by...' or 'Your [actual product/service] description lacks...'",
+        "Reference actual content when possible and be specific about what needs improvement",
+        "Be constructive and actionable in your feedback"
       ],
       "actionableSteps": [
-        "The Top 3 most important, high-impact next steps the business owner should take.",
-        "Each step should be clearly explained and actionable.",
-        "This section's content should correspond to a section titled 'Top 3 Recommended Next Steps' in a human-readable report."
+        "The Top 3 most important, high-impact next steps that reference specific content from the website. For example: 'Revise your [actual headline] to better communicate...' or 'Add testimonials to your [specific product] page'",
+        "Each step should reference actual content, pages, or elements from the site",
+        "Make it clear these recommendations are specifically for this website's content"
       ],
       "improvements": [
-        "2-3 additional tailored suggestions for improvement, kept concise."
+        "2-3 additional tailored suggestions that reference specific content or elements from the website",
+        "Reference actual pages, sections, or content when making suggestions"
       ],
       "pillarScores": {
         "branding": 85,
@@ -143,6 +214,13 @@ export const buildPrompt = (
     ---
     ${extractedText || '[Content will be fetched during analysis]'}
     ---
+
+    PERSONALIZATION EXAMPLES:
+    • Instead of "Your headline could be improved" say "Your headline '[actual headline text]' could be improved by..."
+    • Instead of "Add testimonials" say "Add testimonials to your [specific product/service] page"
+    • Instead of "Improve your value proposition" say "Your value proposition about [specific offering] could be strengthened by..."
+    • Reference actual product names, service descriptions, or unique features you find
+    • Quote specific phrases or taglines from the website when making points
 
     CRITICAL INSTRUCTIONS FOR VISUAL IDENTITY:
     • Analyze the website's actual color scheme and extract 3-5 primary hex color codes (e.g., "#ff69b4", "#000000")

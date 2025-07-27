@@ -64,6 +64,16 @@ export async function POST(req: NextRequest) {
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
       auditResult = mockAuditResult;
+      
+      // Return mock data with flag
+      return NextResponse.json({
+        success: true,
+        message: 'Mock data returned (AI analysis not available)',
+        data: {
+          ...auditResult,
+          isMockData: true,
+        },
+      });
     } else {
       // Ensure the OpenAI API key is configured
       if (!process.env.OPENAI_API_KEY) {
@@ -83,12 +93,10 @@ export async function POST(req: NextRequest) {
         brandPersonality
       );
 
-      const [lighthouseData] = await Promise.all([
+      const [lighthouseData, auditResult] = await Promise.all([
         lighthousePromise,
         analysisPromise,
       ]);
-
-      auditResult = await analysisPromise;
 
       // Combine audit result with Lighthouse data
       const responseData = {
@@ -103,16 +111,6 @@ export async function POST(req: NextRequest) {
         data: responseData,
       });
     }
-
-    // Return mock data with flag
-    return NextResponse.json({
-      success: true,
-      message: 'Mock data returned (AI analysis not available)',
-      data: {
-        ...auditResult,
-        isMockData: true,
-      },
-    });
   } catch (error: unknown) {
     console.error('Error in OpenAI API:', error);
     const errorMessage = error instanceof Error ? error.message : 'Failed to analyze website';
