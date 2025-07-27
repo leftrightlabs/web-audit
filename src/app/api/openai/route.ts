@@ -55,7 +55,6 @@ export async function POST(req: NextRequest) {
     }
 
     let auditResult: AuditResult;
-    let isMockData = false;
 
     // Decide whether to use mock data or real OpenAI analysis
     if (process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true') {
@@ -65,7 +64,6 @@ export async function POST(req: NextRequest) {
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
       auditResult = mockAuditResult;
-      isMockData = true;
     } else {
       // Ensure the OpenAI API key is configured
       if (!process.env.OPENAI_API_KEY) {

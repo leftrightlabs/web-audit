@@ -410,7 +410,7 @@ const Report: React.FC<ReportProps> = ({
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
               <p className="text-gray-600 text-center">
                 Visual identity analysis (colors and fonts) could not be extracted from this website. 
-                This may be due to the site's structure or styling approach.
+                This may be due to the site&apos;s structure or styling approach.
               </p>
             </div>
           </div>
@@ -544,7 +544,7 @@ const Report: React.FC<ReportProps> = ({
           </h3>
           <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
             Re-run the website analysis with the same settings to get updated insights. 
-            This is useful if you've made changes to your website or want to track improvements over time.
+            This is useful if you&apos;ve made changes to your website or want to track improvements over time.
           </p>
           <Button
             onClick={onRetryAnalysis}

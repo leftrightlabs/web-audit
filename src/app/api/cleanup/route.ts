@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cleanupExpiredReports, getReportStats } from '@/lib/cleanup';
 
-export async function POST(req: NextRequest) {
+export async function POST() {
   try {
     // Optional: Add authentication here for production
     // const authHeader = req.headers.get('authorization');

@@ -32,7 +32,7 @@ const MockDataWarning: React.FC<MockDataWarningProps> = ({ onRetry, isRetrying =
             </h3>
             <div className="text-amber-700 space-y-2">
               <p>
-                We're currently unable to perform a real AI analysis of your website. This could be due to:
+                We&apos;re currently unable to perform a real AI analysis of your website. This could be due to:
               </p>
               <ul className="list-disc ml-5 space-y-1">
                 <li>AI service temporarily unavailable</li>
