@@ -1,5 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
+import Image from 'next/image';
 import BrandHealthScorecard from './PerformanceRadar';
 import { AuditResult, LighthouseData } from '@/types';
 import Button from './Button';
@@ -10,9 +11,7 @@ interface ReportProps {
   lighthouseData: LighthouseData | null;
   website: string;
   onDownloadPdf: () => void;
-  onSendEmail: () => void;
   isGeneratingPdf: boolean;
-  isSendingEmail: boolean;
   onRetryAnalysis?: () => void;
   isRetryingAnalysis?: boolean;
 }
@@ -27,11 +26,7 @@ const ScoreCircle: React.FC<{ score: number; label: string }> = ({
     return 'text-red-600';
   };
 
-  const getScoreBgColor = (value: number) => {
-    if (value >= 90) return 'bg-green-100';
-    if (value >= 50) return 'bg-yellow-100';
-    return 'bg-red-100';
-  };
+
 
   const circumference = 2 * Math.PI * 45;
   const offset = circumference - (score / 100) * circumference;
@@ -76,89 +71,14 @@ const ScoreCircle: React.FC<{ score: number; label: string }> = ({
   );
 };
 
-const ListItem: React.FC<{
-  text: string;
-  type: 'strength' | 'weakness' | 'improvement';
-}> = ({ text, type }) => {
-  const icons = {
-    strength: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-5 w-5 text-white"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M5 13l4 4L19 7"
-        />
-      </svg>
-    ),
-    weakness: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-5 w-5 text-white"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M6 18L18 6M6 6l12 12"
-        />
-      </svg>
-    ),
-    improvement: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-5 w-5 text-navy"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-        />
-      </svg>
-    ),
-  };
 
-  const colors = {
-    strength: 'bg-green-500',
-    weakness: 'bg-red-500',
-    improvement: 'bg-yellow-500',
-  };
-
-  return (
-    <li className="flex items-start p-4 bg-white rounded-lg shadow-soft hover:shadow-hover transition-all duration-300">
-      <div
-        className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mr-4 mt-1 ${
-          colors[type]
-        }`}
-      >
-        {icons[type]}
-      </div>
-      <p className="text-gray-700 leading-relaxed text-balance">{text}</p>
-    </li>
-  );
-};
 
 const Report: React.FC<ReportProps> = ({
   auditResult,
   lighthouseData,
   website,
   onDownloadPdf,
-  onSendEmail,
   isGeneratingPdf,
-  isSendingEmail,
   onRetryAnalysis,
   isRetryingAnalysis,
 }) => {
@@ -173,7 +93,7 @@ const Report: React.FC<ReportProps> = ({
   console.log('Report component - actionableSteps count:', actionableSteps?.length || 0);
 
   // Helper function to check if we have real AI data
-  const hasRealData = (data: any[] | string | undefined): boolean => {
+  const hasRealData = (data: unknown[] | string | undefined): boolean => {
     if (!data) return false;
     if (Array.isArray(data)) return data.length > 0;
     if (typeof data === 'string') return data.trim().length > 0;
@@ -253,9 +173,11 @@ const Report: React.FC<ReportProps> = ({
           {/* Left Right Labs Logo */}
           <div className="mb-8">
             <div className="text-center">
-              <img 
+              <Image 
                 src="/LeftRightLabs_Logo2022White.png" 
                 alt="Left Right Labs" 
+                width={80}
+                height={80}
                 className="h-16 md:h-20 mx-auto"
               />
             </div>

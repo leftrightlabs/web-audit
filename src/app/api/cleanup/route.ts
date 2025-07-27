@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { cleanupExpiredReports, getReportStats } from '@/lib/cleanup';
 
 export async function POST() {
