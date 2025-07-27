@@ -22,6 +22,18 @@ const Report: React.FC<ReportProps> = ({
   isGeneratingPdf,
   isSendingEmail,
 }) => {
+  // Helper to gracefully format items that might be an object (if the AI returned structured JSON)
+  const formatItem = (item: unknown): string => {
+    if (typeof item === 'string') return item;
+    if (item && typeof item === 'object') {
+      // Join all primitive values of the object with a dash for readability
+      return Object.values(item)
+        .filter(val => typeof val === 'string' || typeof val === 'number')
+        .join(' – ');
+    }
+    return String(item);
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto px-4">
       <div className="text-center mb-10">
@@ -90,7 +102,9 @@ const Report: React.FC<ReportProps> = ({
             Recommended Next Steps
           </h4>
           <ol className="space-y-5">
-            {auditResult.actionableSteps.map((step, index) => (
+            {auditResult.actionableSteps.map((rawStep, index) => {
+              const step = formatItem(rawStep);
+              return (
               <li key={index} className="flex">
                 <span className="flex-shrink-0 w-8 h-8 rounded-full bg-navy flex items-center justify-center mr-3 text-white font-medium">
                   {index + 1}
@@ -99,7 +113,8 @@ const Report: React.FC<ReportProps> = ({
                   <span className="text-gray-700">{step}</span>
                 </div>
               </li>
-            ))}
+            );
+            })}
           </ol>
         </div>
         
@@ -111,11 +126,14 @@ const Report: React.FC<ReportProps> = ({
             Tailored Improvements
           </h4>
           <div className="space-y-4">
-            {auditResult.improvements.map((improvement, index) => (
+            {auditResult.improvements.map((rawImp, index) => {
+              const improvement = formatItem(rawImp);
+              return (
               <div key={index} className="bg-tan p-6 rounded-lg border-l-4 border-gold">
                 <p className="text-gray-700">{improvement}</p>
               </div>
-            ))}
+            );
+            })}
           </div>
         </div>
       </div>
