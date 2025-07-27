@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
-import PerformanceRadar from './PerformanceRadar';
+import BrandHealthScorecard from './PerformanceRadar';
 import { AuditResult, LighthouseData } from '@/types';
 import Button from './Button';
 import MockDataWarning from './MockDataWarning';
@@ -358,32 +358,38 @@ const Report: React.FC<ReportProps> = ({
           )}
         </div>
 
-        {/* Brand Dashboard Section */}
-        {lighthouseData && (
-          <div className="mb-12">
-            <h3 className="font-heading text-2xl font-bold mb-6 text-navy">
-              Snapshot Dashboard
-            </h3>
+                {/* Brand Health Dashboard Section */}
+        <div className="mb-12">
+          <h3 className="font-heading text-2xl font-bold mb-6 text-navy">
+            Brand Health Dashboard
+          </h3>
 
-            {/* Grade + Radar */}
-            <div className="grid md:grid-cols-3 gap-8 items-center">
-              {overallGrade && (
-                <div className="flex flex-col items-center md:col-span-1">
-                  <span className="text-6xl font-extrabold text-navy leading-none">
-                    {overallGrade}
-                  </span>
-                  <span className="mt-2 text-gray-600 font-medium">
-                    Overall Grade
-                  </span>
+          {/* Grade + Brand Health Scores */}
+          <div className="grid md:grid-cols-3 gap-8 items-center">
+            {overallGrade && (
+              <div className="flex flex-col items-center md:col-span-1">
+                <span className="text-6xl font-extrabold text-navy leading-none">
+                  {overallGrade}
+                </span>
+                <span className="mt-2 text-gray-600 font-medium">
+                  Overall Grade
+                </span>
+              </div>
+            )}
+
+            <div className="md:col-span-2">
+              {auditResult.pillarScores ? (
+                <BrandHealthScorecard scores={auditResult.pillarScores} />
+              ) : (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                  <p className="text-gray-600 text-center">
+                    Brand health scores temporarily unavailable
+                  </p>
                 </div>
               )}
-
-              <div className="md:col-span-2">
-                <PerformanceRadar scores={lighthouseData} />
-              </div>
             </div>
           </div>
-        )}
+        </div>
 
         {/* Visual Identity Section */}
         {(auditResult.colorPalette || auditResult.fonts) && (
