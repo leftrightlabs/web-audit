@@ -80,7 +80,7 @@ export default function ReportViewerPage({ params }: PageProps) {
   const { auditResult, lighthouseData, website } = payload;
 
   return (
-    <div className="min-h-screen flex flex-col w-full py-8 md:py-12">
+    <div className="min-h-screen flex flex-col w-full">
       <header className="bg-navy text-white py-6 shadow-md w-full">
         <div className="container mx-auto px-4 flex items-center justify-center">
           <h1 className="font-heading text-2xl md:text-3xl font-bold tracking-heading text-balance">
@@ -90,7 +90,7 @@ export default function ReportViewerPage({ params }: PageProps) {
       </header>
 
       <main className="flex-grow w-full">
-        <div className="py-8 md:py-12 w-full">
+        <div className="w-full">
           <Report
             auditResult={auditResult}
             lighthouseData={lighthouseData}
