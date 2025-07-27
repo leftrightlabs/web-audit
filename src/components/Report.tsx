@@ -3,6 +3,7 @@ import { useState } from 'react';
 import PerformanceRadar from './PerformanceRadar';
 import { AuditResult, LighthouseData } from '@/types';
 import Button from './Button';
+import MockDataWarning from './MockDataWarning';
 
 interface ReportProps {
   auditResult: AuditResult;
@@ -12,6 +13,8 @@ interface ReportProps {
   onSendEmail: () => void;
   isGeneratingPdf: boolean;
   isSendingEmail: boolean;
+  onRetryAnalysis?: () => void;
+  isRetryingAnalysis?: boolean;
 }
 
 const ScoreCircle: React.FC<{ score: number; label: string }> = ({
@@ -150,6 +153,8 @@ const Report: React.FC<ReportProps> = ({
   onSendEmail,
   isGeneratingPdf,
   isSendingEmail,
+  onRetryAnalysis,
+  isRetryingAnalysis,
 }) => {
   const { summary, strengths, weaknesses, actionableSteps, improvements } =
     auditResult;
@@ -231,6 +236,14 @@ const Report: React.FC<ReportProps> = ({
         </p>
       </div>
 
+      {/* Show warning if using mock data */}
+      {auditResult.isMockData && onRetryAnalysis && (
+        <MockDataWarning 
+          onRetry={onRetryAnalysis}
+          isRetrying={isRetryingAnalysis}
+        />
+      )}
+
       {/* Action buttons */}
       <div className="flex flex-col md:flex-row gap-4 justify-center mb-12">
         <Button
@@ -238,16 +251,18 @@ const Report: React.FC<ReportProps> = ({
           isLoading={isGeneratingPdf}
           variant="primary"
           size="lg"
+          disabled={auditResult.isMockData}
         >
-          Download PDF Report
+          {auditResult.isMockData ? 'Download Unavailable' : 'Download PDF Report'}
         </Button>
         <Button
           onClick={onSendEmail}
           isLoading={isSendingEmail}
           variant="outline"
           size="lg"
+          disabled={auditResult.isMockData}
         >
-          Email Me This Report
+          {auditResult.isMockData ? 'Email Unavailable' : 'Email Me This Report'}
         </Button>
 
         <Button
@@ -255,12 +270,54 @@ const Report: React.FC<ReportProps> = ({
           isLoading={isGeneratingLink}
           variant="gold"
           size="lg"
+          disabled={auditResult.isMockData}
         >
-          {linkCopied ? 'Link Copied!' : 'Share Report'}
+          {auditResult.isMockData ? 'Share Unavailable' : (linkCopied ? 'Link Copied!' : 'Share Report')}
         </Button>
       </div>
 
+      {/* Explanation for disabled buttons */}
+      {auditResult.isMockData && (
+        <div className="text-center mb-8">
+          <p className="text-sm text-gray-600">
+            Download, email, and share features are disabled when using generic content.
+          </p>
+        </div>
+      )}
+
       <div className="bg-white rounded-lg shadow-xl p-8 md:p-12 border border-gray-100">
+        {/* Warning banner for mock data */}
+        {auditResult.isMockData && (
+          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-red-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h4 className="text-sm font-medium text-red-800">
+                  ⚠️ Generic Content Warning
+                </h4>
+                <p className="mt-1 text-sm text-red-700">
+                  This report contains generic placeholder content because AI analysis is currently unavailable. 
+                  The information below should not be used for business decisions.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Summary Section */}
         <div className="mb-12">
           <h3 className="font-heading text-2xl font-bold mb-4 text-navy">
@@ -343,24 +400,58 @@ const Report: React.FC<ReportProps> = ({
           </div>
         )}
 
+        {/* No Visual Identity Data Message */}
+        {(!auditResult.colorPalette || auditResult.colorPalette.length === 0) && 
+         (!auditResult.fonts || auditResult.fonts.length === 0) && (
+          <div className="mb-12">
+            <h3 className="font-heading text-2xl font-bold mb-6 text-navy">
+              Visual Identity Snapshot
+            </h3>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+              <p className="text-gray-600 text-center">
+                Visual identity analysis (colors and fonts) could not be extracted from this website. 
+                This may be due to the site's structure or styling approach.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* ROI Forecast Section */}
         {lighthouseData && (
           <div className="mb-12">
             <h3 className="font-heading text-2xl font-bold mb-4 text-navy">
               ROI Forecast
             </h3>
-            <p className="text-gray-700 leading-relaxed text-balance">
-              Improving your performance score from {lighthouseData.performance} to
-              90 could reduce bounce rates by approximately{' '}
-              <strong>
-                {Math.max(0, (90 - lighthouseData.performance) * 0.5).toFixed(1)}%
-              </strong>{' '}
-              and increase on-site engagement. Faster experiences translate
-              directly into higher conversion potential and revenue.
-            </p>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-lg border border-green-200">
+                <h4 className="font-heading text-lg font-semibold mb-2 text-green-800">
+                  Performance Impact
+                </h4>
+                <p className="text-green-700 text-sm">
+                  Improving page speed and user experience could increase conversion rates by 15-25%.
+                </p>
+              </div>
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg border border-blue-200">
+                <h4 className="font-heading text-lg font-semibold mb-2 text-blue-800">
+                  SEO Potential
+                </h4>
+                <p className="text-blue-700 text-sm">
+                  Optimizing content and technical SEO could improve search rankings and organic traffic.
+                </p>
+              </div>
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-lg border border-purple-200">
+                <h4 className="font-heading text-lg font-semibold mb-2 text-purple-800">
+                  Brand Growth
+                </h4>
+                <p className="text-purple-700 text-sm">
+                  Enhanced branding and messaging could increase customer trust and brand recognition.
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
+        {/* Technical Performance Metrics */}
         {lighthouseData && (
           <div className="mb-12">
             <h3 className="font-heading text-2xl font-bold mb-6 text-navy">
@@ -384,6 +475,7 @@ const Report: React.FC<ReportProps> = ({
           </div>
         )}
 
+        {/* Strengths and Weaknesses Grid */}
         <div className="grid md:grid-cols-2 gap-12">
           {/* Strengths Section */}
           <div>
@@ -442,6 +534,27 @@ const Report: React.FC<ReportProps> = ({
             </ul>
           </div>
         )}
+      </div>
+
+      {/* Rescan Section - Separate from main report */}
+      <div className="mt-12 bg-gray-50 rounded-lg p-8 border border-gray-200">
+        <div className="text-center">
+          <h3 className="font-heading text-xl font-semibold mb-4 text-navy">
+            Need a Fresh Analysis?
+          </h3>
+          <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+            Re-run the website analysis with the same settings to get updated insights. 
+            This is useful if you've made changes to your website or want to track improvements over time.
+          </p>
+          <Button
+            onClick={onRetryAnalysis}
+            isLoading={isRetryingAnalysis}
+            variant="outline"
+            size="lg"
+          >
+            {isRetryingAnalysis ? 'Rescanning...' : '🔄 Rescan Website'}
+          </Button>
+        </div>
       </div>
     </div>
   );

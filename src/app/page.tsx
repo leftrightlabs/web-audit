@@ -186,6 +186,76 @@ export default function Home() {
     setStep(1);
   };
 
+  // Handle retry analysis when mock data is detected
+  const handleRetryAnalysis = async () => {
+    if (!formData.website) return;
+    
+    setLoading(true);
+    setError('');
+    setStep(3); // Move to analysis step to show progress
+
+    // Start progress simulation
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+      progress += 1;
+      setAnalysisProgress(prev => {
+        const newProgress = prev + 1;
+        return newProgress > 95 ? 95 : newProgress; // Cap at 95% until real completion
+      });
+      
+      if (progress >= 95) {
+        clearInterval(progressInterval);
+      }
+    }, 500);
+
+    try {
+      // Call API to analyze website with all form data
+      const openAiPayload = {
+        website: formData.website,
+        businessGoal: formData.websiteGoal,
+        industry: formData.industryType,
+        runningAds: formData.marketingCampaigns,
+        targetAudience: formData.targetAudience,
+        brandPersonality: formData.brandPersonality,
+      };
+
+      const response = await fetch('/api/openai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(openAiPayload),
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to analyze website');
+      }
+
+      // Clear progress interval and set to 100%
+      clearInterval(progressInterval);
+      setAnalysisProgress(100);
+
+      // Set audit result and move to report step after a short delay
+      setTimeout(() => {
+        setAuditResult(result.data);
+        setLighthouseData(result.data.lighthouseData || null);
+        setStep(4);
+      }, 1000);
+    } catch (error: unknown) {
+      clearInterval(progressInterval);
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      setError(errorMessage);
+
+      // Show toast with retry option
+      setToast({
+        message: 'We couldn\'t reach our analysis service. Please try again.',
+        onRetry: () => handleRetryAnalysis(),
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Handle PDF download
   const handleDownloadPdf = async () => {
     if (!auditResult) return;
@@ -318,6 +388,8 @@ export default function Home() {
                 onSendEmail={handleSendEmail}
                 isGeneratingPdf={pdfLoading}
                 isSendingEmail={emailLoading}
+                onRetryAnalysis={handleRetryAnalysis}
+                isRetryingAnalysis={loading}
               />
             )}
           </div>

@@ -1,18 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 import { AuditResult, LighthouseData } from '@/types';
-
-// Secret used to sign the JWT. MUST be set in the environment in production.
-const JWT_SECRET = process.env.MAGIC_LINK_SECRET || 'development-secret-key';
+import { supabase } from '@/lib/supabase';
+import { generateUniqueShortId } from '@/lib/shortId';
 
 interface RequestBody {
   auditResult: AuditResult;
   lighthouseData: LighthouseData | null;
   website: string;
 }
-
-// Ensure this route runs in the Node.js runtime so we can use "jsonwebtoken"
-export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,19 +22,40 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Sign a JWT valid for 30 days containing the report payload
-    const token = jwt.sign({ auditResult, lighthouseData, website }, JWT_SECRET, {
-      expiresIn: '30d',
-    });
+    // Generate a unique short ID
+    const shortId = await generateUniqueShortId();
 
-    // Determine the base URL dynamically (falls back to env variable or localhost)
+    // Calculate expiration date (30 days from now)
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30);
+
+    // Store the report data in Supabase
+    const { error } = await supabase
+      .from('shared_reports')
+      .insert({
+        short_id: shortId,
+        audit_result: auditResult,
+        lighthouse_data: lighthouseData,
+        website: website,
+        expires_at: expiresAt.toISOString()
+      });
+
+    if (error) {
+      console.error('Error storing shared report:', error);
+      return NextResponse.json(
+        { success: false, message: 'Failed to store report data' },
+        { status: 500 }
+      );
+    }
+
+    // Determine the base URL dynamically
     const origin =
       req.headers.get('origin') ||
       process.env.NEXT_PUBLIC_BASE_URL ||
       'http://localhost:3000';
 
-    // Construct the full shareable URL
-    const shareUrl = `${origin}/report/${encodeURIComponent(token)}`;
+    // Construct the short shareable URL
+    const shareUrl = `${origin}/report/${shortId}`;
 
     return NextResponse.json({ success: true, url: shareUrl });
   } catch (error) {

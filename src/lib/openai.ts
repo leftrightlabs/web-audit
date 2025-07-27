@@ -38,14 +38,37 @@ const fetchWebsiteContent = async (url: string): Promise<string> => {
 
 // Extract key text content from HTML
 const extractTextFromHtml = (html: string): string => {
-  // Basic extraction of text from HTML for analysis
-  // Remove scripts, styles, and HTML tags
-  let text = html
+  // Enhanced extraction to include CSS and styling information
+  let text = html;
+  
+  // Extract CSS styles for color and font analysis
+  const styleMatches = html.match(/<style[^>]*>([\s\S]*?)<\/style>/gi);
+  const linkMatches = html.match(/<link[^>]*rel=["']stylesheet["'][^>]*>/gi);
+  
+  // Extract inline styles
+  const inlineStyleMatches = html.match(/style=["']([^"']*)["']/gi);
+  
+  // Remove scripts and HTML tags but keep some structural info
+  text = html
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, ' ')
-    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, ' ')
     .replace(/<[^>]*>/g, ' ')
     .replace(/\s{2,}/g, ' ')
     .trim();
+  
+  // Add CSS information for better visual analysis
+  let cssInfo = '';
+  if (styleMatches) {
+    cssInfo += '\n\nCSS STYLES FOUND:\n' + styleMatches.join('\n');
+  }
+  if (linkMatches) {
+    cssInfo += '\n\nEXTERNAL STYLESHEETS:\n' + linkMatches.join('\n');
+  }
+  if (inlineStyleMatches) {
+    cssInfo += '\n\nINLINE STYLES:\n' + inlineStyleMatches.join('\n');
+  }
+  
+  // Combine text with CSS info
+  text = text + cssInfo;
   
   // Truncate if too long (GPT has token limits)
   const maxLength = 12000;
@@ -101,8 +124,8 @@ export const buildPrompt = (
         "conversion": 70,
         "content": 82
       },
-      "colorPalette": ["#21145f", "#7950f2", "#f2f2f2"],
-      "fonts": ["Inter", "Roboto"]
+      "colorPalette": [],
+      "fonts": []
     }
     
     ---
@@ -120,6 +143,12 @@ export const buildPrompt = (
     ---
     ${extractedText || '[Content will be fetched during analysis]'}
     ---
+
+    CRITICAL INSTRUCTIONS FOR VISUAL IDENTITY:
+    • Analyze the website's actual color scheme and extract 3-5 primary hex color codes (e.g., "#ff69b4", "#000000")
+    • Identify the main fonts used on the website (e.g., "Arial", "Helvetica", "Georgia")
+    • Do NOT use placeholder values - extract real colors and fonts from the website content
+    • If you cannot determine colors/fonts from the content, leave the arrays empty
 
     Replace all example values with the actual values you calculate. Use ONLY:
     • Numbers (0-100) for pillarScores.

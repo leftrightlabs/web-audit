@@ -39,6 +39,8 @@ export interface AuditResult {
   colorPalette?: string[];
   /** Top fonts detected on the site (e.g. ["Inter", "Roboto"]) */
   fonts?: string[];
+  /** Flag indicating if this is mock data instead of real AI analysis */
+  isMockData?: boolean;
 }
 
 export interface LighthouseData {

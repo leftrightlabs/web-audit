@@ -47,6 +47,9 @@ export const supabase = isSupabaseConfigured()
   ? createClient<Database>(supabaseUrl, supabaseAnonKey)
   : createMockClient() as unknown as ReturnType<typeof createClient<Database>>;
 
+
+
+
 // For server-side operations (API routes) with service role key
 // This should never be exposed to the client
 let supabaseAdmin: ReturnType<typeof createClient<Database>> | null = null;

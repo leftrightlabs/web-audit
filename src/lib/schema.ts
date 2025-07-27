@@ -54,6 +54,19 @@ export const preferencesFormSchema = z.object({
 // Remove the websiteFormSchema and use the combined form schema
 export const formSchema = leadFormSchema.merge(preferencesFormSchema);
 
+// Add new table for shared reports
+export const sharedReportsTable = {
+  id: 'shared_reports',
+  columns: {
+    short_id: 'text primary key',
+    audit_result: 'jsonb not null',
+    lighthouse_data: 'jsonb',
+    website: 'text not null',
+    created_at: 'timestamp with time zone default timezone(\'utc\'::text, now()) not null',
+    expires_at: 'timestamp with time zone not null'
+  }
+} as const;
+
 export type LeadFormValues = z.infer<typeof leadFormSchema>;
 export type PreferencesFormValues = z.infer<typeof preferencesFormSchema>;
 export type FormValues = z.infer<typeof formSchema>; 

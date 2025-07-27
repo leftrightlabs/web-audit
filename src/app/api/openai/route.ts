@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
     }
 
     let auditResult: AuditResult;
+    let isMockData = false;
 
     // Decide whether to use mock data or real OpenAI analysis
     if (process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true') {
@@ -64,6 +65,7 @@ export async function POST(req: NextRequest) {
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
       auditResult = mockAuditResult;
+      isMockData = true;
     } else {
       // Ensure the OpenAI API key is configured
       if (!process.env.OPENAI_API_KEY) {
@@ -94,14 +96,25 @@ export async function POST(req: NextRequest) {
       const responseData = {
         ...auditResult,
         lighthouseData,
+        isMockData: false,
       };
 
+      return NextResponse.json({
+        success: true,
+        message: 'Website analyzed successfully',
+        data: responseData,
+      });
+    }
+
+    // Return mock data with flag
     return NextResponse.json({
       success: true,
-      message: 'Website analyzed successfully',
-      data: responseData,
+      message: 'Mock data returned (AI analysis not available)',
+      data: {
+        ...auditResult,
+        isMockData: true,
+      },
     });
-    }
   } catch (error: unknown) {
     console.error('Error in OpenAI API:', error);
     const errorMessage = error instanceof Error ? error.message : 'Failed to analyze website';

@@ -8,8 +8,8 @@ interface TokenPayload {
   auditResult: AuditResult;
   lighthouseData: LighthouseData | null;
   website: string;
-  iat: number;
-  exp: number;
+  created_at: string;
+  expires_at: string;
 }
 
 interface PageProps {
@@ -38,7 +38,11 @@ export default function ReportViewerPage({ params }: PageProps) {
         if (result.success) {
           setPayload(result.payload);
         } else {
-          setError('Invalid or expired link');
+          if (response.status === 410) {
+            setError('This report has expired');
+          } else {
+            setError('Invalid or expired link');
+          }
         }
       } catch (err) {
         console.error('Token verification failed:', err);
@@ -67,7 +71,7 @@ export default function ReportViewerPage({ params }: PageProps) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-3xl font-bold mb-4 text-navy">Invalid or Expired Link</h1>
-          <p className="text-gray-700">The magic link you used is no longer valid. Please request a new one.</p>
+          <p className="text-gray-700">{error || 'The link you used is no longer valid. Please request a new one.'}</p>
         </div>
       </div>
     );
