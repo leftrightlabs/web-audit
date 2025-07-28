@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import BrandHealthScorecard from './PerformanceRadar';
 import { AuditResult, LighthouseData } from '@/types';
 import Button from './Button';
@@ -111,6 +111,10 @@ const Report: React.FC<ReportProps> = ({
   // State for PDF generation (internal)
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
+  // State for website screenshot
+  const [screenshot, setScreenshot] = useState<string | null>(null);
+  const [isLoadingScreenshot, setIsLoadingScreenshot] = useState(false);
+
   const handleShareLink = async () => {
     setIsGeneratingLink(true);
     setLinkCopied(false);
@@ -155,6 +159,7 @@ const Report: React.FC<ReportProps> = ({
           auditResult,
           userData: { website },
           lighthouseData,
+          screenshot,
         }),
       });
 
@@ -210,6 +215,55 @@ const Report: React.FC<ReportProps> = ({
   };
 
   const overallGrade = deriveGrade();
+
+  // Fetch website screenshot on component mount
+  useEffect(() => {
+    const fetchScreenshot = async (retryCount = 0) => {
+      if (!website || auditResult.isMockData) return;
+      
+      setIsLoadingScreenshot(true);
+      try {
+        console.log(`Fetching screenshot for: ${website} (attempt ${retryCount + 1})`);
+        
+        const response = await fetch('/api/screenshot', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: website }),
+        });
+
+        const result = await response.json();
+        
+        if (result.success && result.data.screenshot) {
+          console.log('Screenshot received, length:', result.data.screenshot.length);
+          console.log('Setting screenshot state...');
+          setScreenshot(result.data.screenshot);
+          console.log('Screenshot state set successfully');
+        } else {
+          console.warn('Failed to fetch screenshot:', result.message);
+          // Retry once if it's the first attempt
+          if (retryCount === 0) {
+            console.log('Retrying screenshot capture...');
+            setTimeout(() => fetchScreenshot(1), 2000);
+            return;
+          }
+          setScreenshot(null);
+        }
+      } catch (error) {
+        console.error('Error fetching screenshot:', error);
+        // Retry once if it's the first attempt
+        if (retryCount === 0) {
+          console.log('Retrying screenshot capture after error...');
+          setTimeout(() => fetchScreenshot(1), 2000);
+          return;
+        }
+        setScreenshot(null);
+      } finally {
+        setIsLoadingScreenshot(false);
+      }
+    };
+
+    fetchScreenshot();
+  }, [website, auditResult.isMockData]);
 
   return (
     <div className="w-full">
@@ -325,15 +379,66 @@ const Report: React.FC<ReportProps> = ({
               </p>
             </div>
           ) : (
-            <div className="bg-white/40 backdrop-blur-sm rounded-xl p-8">
-              <div className="space-y-4">
-                {summary.split('. ').map((sentence, index) => (
-                  sentence.trim() && (
-                    <p key={index} className="text-navy/90 leading-relaxed text-balance text-lg">
-                      {sentence.trim()}.
-                    </p>
-                  )
-                ))}
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Website Screenshot */}
+              <div className="flex flex-col items-center">
+                <h3 className="font-heading text-xl font-semibold mb-4 text-navy">
+                  Website Snapshot
+                </h3>
+                <div className="bg-white/40 backdrop-blur-sm rounded-xl p-4 w-full">
+                  {isLoadingScreenshot ? (
+                    <div className="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center">
+                      <div className="text-navy/60">Loading screenshot...</div>
+                    </div>
+                  ) : screenshot ? (
+                    <div className="relative">
+                      <img 
+                        src={screenshot} 
+                        alt={`Screenshot of ${website}`}
+                        className="w-full h-auto rounded-lg shadow-md"
+                        style={{ maxHeight: '400px', objectFit: 'contain' }}
+                        onError={(e) => {
+                          console.error('Failed to load screenshot image');
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                      <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                        Website Preview
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center">
+                      <div className="text-navy/60">Screenshot unavailable</div>
+                    </div>
+                  )}
+                  
+                  {/* Fallback placeholder that shows if image fails to load */}
+                  {!isLoadingScreenshot && !screenshot && (
+                    <div className="w-full h-64 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-gray-300">
+                      <svg className="w-12 h-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <div className="text-navy/60 text-center">
+                        <div className="font-medium">Website Snapshot</div>
+                        <div className="text-sm">Unable to capture screenshot</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Audit Summary Text */}
+              <div className="bg-white/40 backdrop-blur-sm rounded-xl p-8">
+                <div className="space-y-4">
+                  {summary.split('. ').map((sentence, index) => (
+                    sentence.trim() && (
+                      <p key={index} className="text-navy/90 leading-relaxed text-balance text-lg">
+                        {sentence.trim()}.
+                      </p>
+                    )
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -602,14 +707,14 @@ const Report: React.FC<ReportProps> = ({
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
-              onClick={() => window.open('https://leftrightlabs.com/contact', '_blank')}
+              onClick={() => window.open('https://leftrightlabs.com/start-here/', '_blank')}
               variant="glassy"
               size="lg"
             >
               Book Strategy Session
             </Button>
             <Button
-              onClick={() => window.open('https://leftrightlabs.com', '_blank')}
+              onClick={() => window.open('https://leftrightlabs.com/about/', '_blank')}
               variant="glassy"
               size="lg"
             >
