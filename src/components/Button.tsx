@@ -2,7 +2,7 @@ import React from 'react';
 
 interface ButtonProps {
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'gold' | 'outline';
+  variant?: 'primary' | 'secondary' | 'gold' | 'outline' | 'glassy';
   size?: 'sm' | 'md' | 'lg';
   type?: 'button' | 'submit' | 'reset';
   fullWidth?: boolean;
@@ -27,7 +27,8 @@ const Button: React.FC<ButtonProps> = ({
     primary: "bg-gradient-to-r from-navy to-purple text-white hover:opacity-90 hover:shadow-hover",
     secondary: "bg-gradient-to-r from-purple to-navy text-white hover:opacity-90 hover:shadow-hover",
     gold: "bg-gradient-to-r from-gold to-yellow-500 text-white hover:opacity-90 hover:shadow-hover",
-    outline: "border-2 border-gray-300 text-gray-600 bg-white hover:bg-gray-50 hover:border-gray-400 hover:shadow-soft"
+    outline: "border-2 border-gray-300 text-gray-600 bg-white hover:bg-gray-50 hover:border-gray-400 hover:shadow-soft",
+    glassy: "bg-white/20 backdrop-blur-md text-white border border-white/30 hover:bg-white/30 hover:border-white/50 hover:shadow-lg"
   };
   
   const sizeClasses = {

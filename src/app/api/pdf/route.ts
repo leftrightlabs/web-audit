@@ -1,10 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
-import { generatePDF } from '@/lib/pdf';
+import React from 'react';
+import { renderToBuffer } from '@react-pdf/renderer';
+import BrandAuditPDF from '@/components/BrandAuditPDF';
+import { AuditResult, FormData, LighthouseData } from '@/types';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { auditResult, userData } = body;
+    const { auditResult, userData, lighthouseData } = body;
 
     // Validate required fields
     if (!auditResult || !userData) {
@@ -15,12 +19,23 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      // Generate PDF
-      const pdf = generatePDF(auditResult, userData);
+      console.log('Starting PDF generation...');
+      console.log('Audit result:', JSON.stringify(auditResult, null, 2));
+      console.log('User data:', JSON.stringify(userData, null, 2));
+      
+      // Generate PDF using React PDF renderer
+      const pdfBuffer = await renderToBuffer(
+        React.createElement(BrandAuditPDF, {
+          auditResult,
+          userData,
+          lighthouseData,
+        }) as any
+      );
 
-      // Convert PDF Blob to Base64
-      const buffer = await pdf.arrayBuffer();
-      const base64 = Buffer.from(buffer).toString('base64');
+      console.log('PDF buffer generated, size:', pdfBuffer.length);
+      
+      // Convert buffer to base64
+      const base64 = Buffer.from(pdfBuffer).toString('base64');
 
       return NextResponse.json({
         success: true,

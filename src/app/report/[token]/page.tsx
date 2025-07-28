@@ -23,6 +23,7 @@ export default function ReportViewerPage({ params }: PageProps) {
   const [payload, setPayload] = useState<TokenPayload | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // PDF generation is now handled internally in the Report component
 
   useEffect(() => {
     const verifyToken = async () => {
@@ -79,6 +80,8 @@ export default function ReportViewerPage({ params }: PageProps) {
 
   const { auditResult, lighthouseData, website } = payload;
 
+  // PDF generation is now handled internally in the Report component using html2pdf.js
+
   return (
     <div className="min-h-screen flex flex-col w-full">
       <main className="flex-grow w-full">
@@ -87,8 +90,6 @@ export default function ReportViewerPage({ params }: PageProps) {
             auditResult={auditResult}
             lighthouseData={lighthouseData}
             website={website}
-            onDownloadPdf={() => {}}
-            isGeneratingPdf={false}
           />
         </div>
       </main>

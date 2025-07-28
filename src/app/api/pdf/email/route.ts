@@ -1,15 +1,20 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
+import React from 'react';
 import nodemailer from 'nodemailer';
+import { renderToBuffer } from '@react-pdf/renderer';
+import BrandAuditPDF from '@/components/BrandAuditPDF';
+import { AuditResult, FormData, LighthouseData } from '@/types';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { email, name, website, pdfBase64 } = body;
+    const { email, name, website, auditResult, lighthouseData } = body;
 
     // Validate required fields
-    if (!email || !pdfBase64) {
+    if (!email || !auditResult) {
       return NextResponse.json(
-        { success: false, message: 'Email and PDF data are required' },
+        { success: false, message: 'Email and audit result are required' },
         { status: 400 }
       );
     }
@@ -33,6 +38,15 @@ export async function POST(req: NextRequest) {
         message: 'Email sending simulated in mock mode',
       });
     }
+
+    // Generate PDF using React PDF renderer
+    const pdfBuffer = await renderToBuffer(
+      React.createElement(BrandAuditPDF, {
+        auditResult,
+        userData: { website, name, email },
+        lighthouseData,
+      }) as any
+    );
 
     // Get email configuration from environment variables
     const emailUser = process.env.EMAIL_USER;
@@ -58,9 +72,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Extract base64 data from data URL
-    const pdfData = pdfBase64.split(';base64,').pop();
-
     // Set up email options
     const mailOptions = {
       from: `"Website Brand Audit" <${emailUser}>`,
@@ -81,7 +92,7 @@ Website Brand Audit Team
       attachments: [
         {
           filename: `${website.replace(/^https?:\/\//, '').replace(/\/$/, '')}-brand-audit.pdf`,
-          content: Buffer.from(pdfData, 'base64'),
+          content: pdfBuffer,
           contentType: 'application/pdf',
         },
       ],

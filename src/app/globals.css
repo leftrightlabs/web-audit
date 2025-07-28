@@ -69,6 +69,10 @@ h1, h2, h3, h4, h5, h6 {
   @apply bg-white text-[#21145f] border border-[#21145f] px-6 py-3 rounded-md font-medium transition-all duration-200 hover:bg-[#21145f] hover:text-white hover:shadow-sm;
 }
 
+.btn-glassy {
+  @apply bg-white/20 backdrop-blur-md text-white border border-white/30 px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:bg-white/30 hover:border-white/50 hover:shadow-lg;
+}
+
 .section-container {
   @apply w-full max-w-7xl mx-auto px-4 py-16 md:py-24;
 }
@@ -126,4 +130,175 @@ input, select, textarea {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+/* PDF Export Styles - Simplified */
+.pdf-export {
+  background: white !important;
+  color: black !important;
+  font-family: Arial, sans-serif !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  padding: 20px !important;
+  margin: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  overflow: visible !important;
+}
+
+.pdf-export * {
+  color: black !important;
+  background-color: transparent !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  word-wrap: break-word !important;
+}
+
+/* Ensure full width usage in PDF */
+.pdf-export .max-w-6xl {
+  max-width: none !important;
+  width: 100% !important;
+}
+
+.pdf-export .px-4 {
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+}
+
+/* Fix grid layouts for PDF */
+.pdf-export .grid {
+  display: grid !important;
+  gap: 1rem !important;
+}
+
+.pdf-export .md\:grid-cols-2 {
+  grid-template-columns: 1fr 1fr !important;
+}
+
+.pdf-export .md\:grid-cols-3 {
+  grid-template-columns: 1fr 1fr 1fr !important;
+}
+
+.pdf-export .md\:grid-cols-4 {
+  grid-template-columns: 1fr 1fr 1fr 1fr !important;
+}
+
+/* Ensure sections don't get cut off */
+.pdf-export section {
+  page-break-inside: avoid !important;
+  margin-bottom: 1rem !important;
+  overflow: visible !important;
+}
+
+/* Fix spacing issues */
+.pdf-export .space-y-12 > * + * {
+  margin-top: 1rem !important;
+}
+
+.pdf-export .space-y-6 > * + * {
+  margin-top: 0.5rem !important;
+}
+
+.pdf-export .space-y-4 > * + * {
+  margin-top: 0.25rem !important;
+}
+
+/* Force text visibility */
+.pdf-export p, .pdf-export div, .pdf-export span {
+  overflow: visible !important;
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  text-overflow: unset !important;
+}
+
+/* Exact color matching */
+.pdf-export .bg-gradient-to-br {
+  background: linear-gradient(135deg, #21145f 0%, #7950f2 100%) !important;
+}
+
+.pdf-export .bg-gradient-to-r {
+  background: linear-gradient(90deg, #21145f 0%, #7950f2 100%) !important;
+}
+
+.pdf-export .bg-navy {
+  background-color: #21145f !important;
+}
+
+.pdf-export .bg-purple {
+  background-color: #7950f2 !important;
+}
+
+.pdf-export .bg-tan {
+  background-color: #eae1cd !important;
+}
+
+.pdf-export .bg-white\/10 {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.pdf-export .bg-white\/40 {
+  background-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.pdf-export .text-white {
+  color: white !important;
+}
+
+.pdf-export .text-navy {
+  color: #21145f !important;
+}
+
+.pdf-export .text-gold {
+  color: #b0943d !important;
+}
+
+.pdf-export .text-white\/90 {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.pdf-export .text-white\/80 {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.pdf-export .text-navy\/90 {
+  color: rgba(33, 20, 95, 0.9) !important;
+}
+
+.pdf-export .text-navy\/80 {
+  color: rgba(33, 20, 95, 0.8) !important;
+}
+
+/* Fix rounded corners */
+.pdf-export .rounded-2xl {
+  border-radius: 1rem !important;
+}
+
+.pdf-export .rounded-xl {
+  border-radius: 0.75rem !important;
+}
+
+/* Fix backdrop blur */
+.pdf-export .backdrop-blur-sm {
+  backdrop-filter: none !important;
+}
+
+/* Ensure proper font sizes */
+.pdf-export .text-3xl {
+  font-size: 1.875rem !important;
+}
+
+.pdf-export .text-xl {
+  font-size: 1.25rem !important;
+}
+
+.pdf-export .text-lg {
+  font-size: 1.125rem !important;
+}
+
+.pdf-export .text-base {
+  font-size: 1rem !important;
+}
+
+.pdf-export .text-sm {
+  font-size: 0.875rem !important;
 }

@@ -110,7 +110,7 @@ const BrandHealthScorecard: React.FC<BrandHealthScorecardProps> = ({ scores }) =
       </div>
       
       {/* Overall score summary */}
-      <div className="mt-8 p-6 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+      <div className="mt-8 p-6 bg-white/10 backdrop-blur-sm rounded-xl" style={{ border: 'none' }}>
         <div className="flex items-center justify-between">
           <div>
             <h4 className="font-semibold text-white text-lg">Overall Brand Health</h4>

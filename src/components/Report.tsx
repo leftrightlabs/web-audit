@@ -1,6 +1,5 @@
 import React from 'react';
 import { useState } from 'react';
-import Image from 'next/image';
 import BrandHealthScorecard from './PerformanceRadar';
 import { AuditResult, LighthouseData } from '@/types';
 import Button from './Button';
@@ -10,8 +9,8 @@ interface ReportProps {
   auditResult: AuditResult;
   lighthouseData: LighthouseData | null;
   website: string;
-  onDownloadPdf: () => void;
-  isGeneratingPdf: boolean;
+  onDownloadPdf?: () => void; // Made optional since we handle it internally now
+  isGeneratingPdf?: boolean; // Made optional since we handle it internally now
   onRetryAnalysis?: () => void;
   isRetryingAnalysis?: boolean;
 }
@@ -77,8 +76,6 @@ const Report: React.FC<ReportProps> = ({
   auditResult,
   lighthouseData,
   website,
-  onDownloadPdf,
-  isGeneratingPdf,
   onRetryAnalysis,
   isRetryingAnalysis,
 }) => {
@@ -110,6 +107,9 @@ const Report: React.FC<ReportProps> = ({
   // State for Share Link generation
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  
+  // State for PDF generation (internal)
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   const handleShareLink = async () => {
     setIsGeneratingLink(true);
@@ -142,6 +142,52 @@ const Report: React.FC<ReportProps> = ({
     }
   };
 
+  const handleDownloadPDF = async () => {
+    setIsGeneratingPdf(true);
+    try {
+      // Call the new PDF generation API
+      const response = await fetch('/api/pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          auditResult,
+          userData: { website },
+          lighthouseData,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF');
+      }
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to generate PDF');
+      }
+
+      // Create a download link for the PDF
+      const link = document.createElement('a');
+      link.href = result.data.pdf;
+      link.download = `${website.replace(/^https?:\/\//, '').replace(/\/$/, '')}-brand-audit.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      console.log('PDF generation completed');
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Failed to generate PDF. Please try again.');
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+
+
   // Helper: derive overall grade (A-F) from Lighthouse average or pillar scores
   const deriveGrade = (): string | null => {
     let score: number | null = null;
@@ -170,18 +216,7 @@ const Report: React.FC<ReportProps> = ({
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-navy to-purple text-white py-16 px-6 mb-12 w-full">
         <div className="text-center max-w-4xl mx-auto">
-          {/* Left Right Labs Logo */}
-          <div className="mb-8">
-            <div className="text-center">
-              <Image 
-                src="/LeftRightLabs_Logo2022White.png" 
-                alt="Left Right Labs" 
-                width={80}
-                height={80}
-                className="h-16 md:h-20 mx-auto"
-              />
-            </div>
-          </div>
+
           
           <h1 className="font-heading text-4xl md:text-5xl font-bold mb-6 tracking-heading text-balance">
             Your Website Brand Audit is Ready
@@ -201,9 +236,9 @@ const Report: React.FC<ReportProps> = ({
           {/* Action buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
-              onClick={onDownloadPdf}
+              onClick={handleDownloadPDF}
               isLoading={isGeneratingPdf}
-              variant="outline"
+              variant="glassy"
               size="lg"
               disabled={auditResult.isMockData}
             >
@@ -212,7 +247,7 @@ const Report: React.FC<ReportProps> = ({
             <Button
               onClick={handleShareLink}
               isLoading={isGeneratingLink}
-              variant="outline"
+              variant="glassy"
               size="lg"
               disabled={auditResult.isMockData}
             >
@@ -240,7 +275,7 @@ const Report: React.FC<ReportProps> = ({
       )}
 
       {/* Main Report Content */}
-      <div className="max-w-6xl mx-auto px-4 space-y-12">
+      <div id="report" className="max-w-6xl mx-auto px-4 space-y-12">
         {/* Brand Health Dashboard Section */}
         <section className="bg-gradient-to-br from-navy to-purple text-white rounded-2xl p-8 md:p-12">
           <h2 className="font-heading text-3xl font-bold mb-8 text-center">
@@ -568,14 +603,14 @@ const Report: React.FC<ReportProps> = ({
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               onClick={() => window.open('https://leftrightlabs.com/contact', '_blank')}
-              variant="outline"
+              variant="glassy"
               size="lg"
             >
               Book Strategy Session
             </Button>
             <Button
               onClick={() => window.open('https://leftrightlabs.com', '_blank')}
-              variant="outline"
+              variant="glassy"
               size="lg"
             >
               Learn More About Us
