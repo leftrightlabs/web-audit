@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Work_Sans } from "next/font/google";
 import "./globals.css";
+import CookieConsentWrapper from "@/components/CookieConsentWrapper";
 
 const workSans = Work_Sans({
   subsets: ["latin"],
@@ -28,6 +29,7 @@ export default function RootLayout({
     <html lang="en" className={workSans.variable}>
       <body>
         {children}
+        <CookieConsentWrapper />
       </body>
     </html>
   );
