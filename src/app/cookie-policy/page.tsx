@@ -129,7 +129,7 @@ export default function CookiePolicyPage() {
                   Our Cookie Banner
                 </h3>
                 <p className="text-gray-700">
-                  When you first visit our website, you'll see a cookie consent banner that allows you to 
+                  When you first visit our website, you&apos;ll see a cookie consent banner that allows you to 
                   accept or decline non-essential cookies. You can change your preferences at any time by 
                   clearing your browser cookies and refreshing the page.
                 </p>
@@ -184,7 +184,7 @@ export default function CookiePolicyPage() {
               <p className="text-gray-700">
                 We may update this Cookie Policy from time to time to reflect changes in our practices 
                 or for other operational, legal, or regulatory reasons. We will notify you of any 
-                material changes by posting the new policy on this page and updating the "Last updated" date.
+                material changes by posting the new policy on this page and updating the &quot;Last updated&quot; date.
               </p>
             </section>
 

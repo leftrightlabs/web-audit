@@ -4,7 +4,6 @@ import React from 'react';
 import nodemailer from 'nodemailer';
 import { renderToBuffer } from '@react-pdf/renderer';
 import BrandAuditPDF from '@/components/BrandAuditPDF';
-import { AuditResult, FormData, LighthouseData } from '@/types';
 
 export async function POST(req: NextRequest) {
   try {

@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import React from 'react';
 import { renderToBuffer } from '@react-pdf/renderer';
 import BrandAuditPDF from '@/components/BrandAuditPDF';
-import { AuditResult, FormData, LighthouseData } from '@/types';
 
 export async function POST(req: NextRequest) {
   try {
